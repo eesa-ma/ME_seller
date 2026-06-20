@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Mind Empowered Brand Colors */
+  --me-maroon: #461711;         /* Primary brand — dark maroon */
+  --me-orange: #ff7612;         /* Accent — bright orange */
+  --me-orange-deep: #e45a00;    /* Deep orange for gradients */
+  --me-navy: #0a2e5c;           /* Secondary — navy blue */
+  --me-cream: #FAF6F1;          /* Warm cream background */
+  --me-cream-border: #E0D4C4;   /* Soft cream border */
+  --me-brown-soft: #7A6A5A;     /* Muted earthy text */
+
+  /* Dashboard CSS Tokens */
+  --bg-primary: #FAF6F1;        /* Cream background */
+  --bg-secondary: #ffffff;      /* White content panels */
+  --bg-sidebar: #461711;        /* Maroon sidebar */
+  --bg-sidebar-hover: rgba(255, 118, 18, 0.15);
+  
+  --text-primary: #461711;      /* Maroon primary text */
+  --text-secondary: #7A6A5A;    /* Muted secondary text */
+  --text-sidebar: #FAF6F1;      /* Warm white/cream for sidebar */
+  
+  --accent: #ff7612;
+  --accent-hover: #e45a00;
+  --accent-soft: rgba(255, 118, 18, 0.1);
+  --border: #E0D4C4;
+  --shadow: 0 4px 20px rgba(70, 23, 17, 0.05);
+  --shadow-hover: 0 8px 30px rgba(70, 23, 17, 0.12);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-width: 260px;
+  
+  /* Alert/Status Colors */
+  --success: #10B981;
+  --success-soft: rgba(16, 185, 129, 0.1);
+  --warning: #F59E0B;
+  --warning-soft: rgba(245, 158, 11, 0.1);
+  --danger: #EF4444;
+  --danger-soft: rgba(239, 68, 68, 0.1);
+  --info: #0a2e5c;
+  --info-soft: rgba(10, 46, 92, 0.1);
+}
+
+[data-theme='dark'] {
+  --bg-primary: #120b0a;        /* Deep charcoal-brown */
+  --bg-secondary: #1a100f;      /* Rich brown/maroon background */
+  --bg-sidebar: #150d0c;        /* Even darker maroon-black */
+  --bg-sidebar-hover: rgba(255, 118, 18, 0.2);
+  
+  --text-primary: #F3ECE7;      /* Clean cream-white */
+  --text-secondary: #A69188;    /* Ashy brown/cream */
+  --text-sidebar: #F3ECE7;
+  
+  --border: #2E1A17;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.7);
+  --accent-soft: rgba(255, 118, 18, 0.15);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: var(--transition);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Common Layout Utilities */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 2.5rem;
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+@media (max-width: 991px) {
+  .dashboard-content {
+    margin-left: 0;
+    padding: 1.5rem;
+    padding-top: 5.5rem; /* Space for mobile header toggle */
+  }
+}
+
+/* Premium Card Design */
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  background-color: var(--bg-secondary);
+}
+
+/* Button Utilities */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--me-orange), var(--me-orange-deep));
+  color: white;
+  box-shadow: 0 4px 14px rgba(255, 118, 18, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 118, 18, 0.4);
+}
+
+.btn-secondary {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+}
+
+.btn-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid transparent;
+}
+
+.btn-danger:hover {
+  background: var(--danger);
+  color: white;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-success { background: var(--success-soft); color: var(--success); }
+.badge-warning { background: var(--warning-soft); color: var(--warning); }
+.badge-danger { background: var(--danger-soft); color: var(--danger); }
+.badge-info { background: var(--info-soft); color: var(--info); }
