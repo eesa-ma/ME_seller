@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Sidebar';
 import { getSellerSession } from '../utils/storage';
 import { Bell, ShoppingBag, ShieldCheck } from 'lucide-react';
@@ -7,6 +8,26 @@ import { Bell, ShoppingBag, ShieldCheck } from 'lucide-react';
 const DashboardLayout = ({ children, onLogout }) => {
   const navigate = useNavigate();
   const [seller, setSeller] = useState(null);
+  
+  // Notification states
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true);
+  const [notifications, setNotifications] = useState([
+    { id: 1, message: 'New order ORD-8924 received from Meera Surendran.', time: '10 mins ago', path: '/orders', read: false },
+    { id: 2, message: 'Low Stock warning: "Empowerment Tote Bag" is down to 5 units.', time: '2 hours ago', path: '/products', read: false },
+    { id: 3, message: 'Fulfillment confirmation: Payout of ₹560.00 processed for ORD-8912.', time: '1 day ago', path: '/analytics', read: true }
+  ]);
+
+  const clearAllNotifications = (e) => {
+    e.stopPropagation();
+    setNotifications([]);
+    setHasUnread(false);
+  };
+
+  const handleNotificationClick = (path) => {
+    setShowNotifications(false);
+    navigate(path);
+  };
 
   useEffect(() => {
     const session = getSellerSession();
@@ -80,10 +101,53 @@ const DashboardLayout = ({ children, onLogout }) => {
               <span className="stat-value">₹{seller.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
             </div>
             
-            <button className="topbar-icon-btn" title="Notifications">
-              <Bell size={20} />
-              <span className="notification-indicator"></span>
-            </button>
+            <div className="notifications-dropdown-container">
+              <button 
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  setHasUnread(false);
+                }} 
+                className="topbar-icon-btn" 
+                title="Notifications"
+              >
+                <Bell size={20} />
+                {hasUnread && <span className="notification-indicator"></span>}
+              </button>
+
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div 
+                    className="notifications-dropdown card"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                  >
+                    <div className="dropdown-header">
+                      <h4>Shop Alerts</h4>
+                      <button onClick={clearAllNotifications} className="clear-all-btn">
+                        Clear All
+                      </button>
+                    </div>
+                    <div className="dropdown-body">
+                      {notifications.length === 0 ? (
+                        <p className="no-notifications-text">No new shop notifications.</p>
+                      ) : (
+                        notifications.map(notif => (
+                          <div 
+                            key={notif.id} 
+                            className={`notification-item ${notif.read ? 'read' : 'unread'}`}
+                            onClick={() => handleNotificationClick(notif.path)}
+                          >
+                            <span className="item-time">{notif.time}</span>
+                            <p>{notif.message}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </header>
 
@@ -167,6 +231,86 @@ const DashboardLayout = ({ children, onLogout }) => {
           background-color: var(--me-orange);
           border-radius: 50%;
           border: 1.5px solid var(--bg-secondary);
+        }
+
+        .notifications-dropdown-container {
+          position: relative;
+        }
+
+        .notifications-dropdown {
+          position: absolute;
+          top: 50px;
+          right: 0;
+          width: 320px;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          box-shadow: var(--shadow-hover);
+          z-index: 1000;
+          padding: 0 !important;
+          overflow: hidden;
+        }
+
+        .dropdown-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid var(--border);
+          background: var(--bg-primary);
+        }
+
+        .dropdown-header h4 {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: var(--text-primary);
+        }
+
+        .clear-all-btn {
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: var(--accent);
+        }
+
+        .clear-all-btn:hover {
+          color: var(--accent-hover);
+        }
+
+        .dropdown-body {
+          max-height: 250px;
+          overflow-y: auto;
+        }
+
+        .notification-item {
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid var(--border);
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: var(--transition);
+          text-align: left;
+        }
+
+        .notification-item:hover {
+          background: var(--bg-primary);
+        }
+
+        .notification-item.unread {
+          background: rgba(255, 118, 18, 0.03);
+          border-left: 3px solid var(--accent);
+        }
+
+        .item-time {
+          font-size: 0.7rem;
+          color: var(--text-secondary);
+          display: block;
+          margin-bottom: 0.15rem;
+        }
+
+        .no-notifications-text {
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+          text-align: center;
+          padding: 2rem 1rem;
         }
 
         .dashboard-page-body {
