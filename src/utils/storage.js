@@ -138,15 +138,15 @@ const DEFAULT_ORDERS = [
   }
 ];
 
-const DEFAULT_SELLER = {
-  id: 'sell_me_1',
-  shopName: 'Mind Empowered Crafts',
-  ownerName: 'ME Foundation',
-  email: 'seller@mind-empowered.org',
-  category: 'Wellness & Stationery',
-  logo: null,
-  balance: 18450.00
-};
+// const DEFAULT_SELLER = {
+//   id: 'sell_me_1',
+//   shopName: 'Mind Empowered Crafts',
+//   ownerName: 'ME Foundation',
+//   email: 'seller@mind-empowered.org',
+//   category: 'Wellness & Stationery',
+//   logo: null,
+//   balance: 18450.00
+// };
 
 // Initialization check
 export const initStorage = () => {
@@ -159,59 +159,59 @@ export const initStorage = () => {
 };
 
 // Seller authentication helper
-export const getSellerSession = () => {
-  const session = localStorage.getItem(SELLER_KEY);
-  return session ? JSON.parse(session) : null;
-};
+// export const getSellerSession = () => {
+//   const session = localStorage.getItem(SELLER_KEY);
+//   return session ? JSON.parse(session) : null;
+// };
 
-export const loginSeller = (email, password) => {
-  // Mock login check
-  if (email === 'seller@mind-empowered.org' && password === 'password') {
-    const session = { ...DEFAULT_SELLER };
-    localStorage.setItem(SELLER_KEY, JSON.stringify(session));
-    return session;
-  }
-  // Allow any other email to signup/login for testing with dummy data
-  const session = {
-    id: 'sell_' + Date.now(),
-    shopName: 'My Community Shop',
-    ownerName: email.split('@')[0],
-    email: email,
-    category: 'General',
-    logo: null,
-    balance: 0.00
-  };
-  localStorage.setItem(SELLER_KEY, JSON.stringify(session));
-  return session;
-};
+// export const loginSeller = (email, password) => {
+//   // Mock login check
+//   if (email === 'seller@mind-empowered.org' && password === 'password') {
+//     const session = { ...DEFAULT_SELLER };
+//     localStorage.setItem(SELLER_KEY, JSON.stringify(session));
+//     return session;
+//   }
+//   // Allow any other email to signup/login for testing with dummy data
+//   const session = {
+//     id: 'sell_' + Date.now(),
+//     shopName: 'My Community Shop',
+//     ownerName: email.split('@')[0],
+//     email: email,
+//     category: 'General',
+//     logo: null,
+//     balance: 0.00
+//   };
+//   localStorage.setItem(SELLER_KEY, JSON.stringify(session));
+//   return session;
+// };
 
-export const registerSeller = (email, password, shopDetails) => {
-  const session = {
-    id: 'sell_' + Date.now(),
-    shopName: shopDetails.shopName || 'ME Craft Shop',
-    ownerName: shopDetails.ownerName || 'ME Volunteer',
-    email: email,
-    category: shopDetails.category || 'Crafts',
-    logo: null,
-    balance: 0.00
-  };
-  localStorage.setItem(SELLER_KEY, JSON.stringify(session));
-  return session;
-};
+// export const registerSeller = (email, password, shopDetails) => {
+//   const session = {
+//     id: 'sell_' + Date.now(),
+//     shopName: shopDetails.shopName || 'ME Craft Shop',
+//     ownerName: shopDetails.ownerName || 'ME Volunteer',
+//     email: email,
+//     category: shopDetails.category || 'Crafts',
+//     logo: null,
+//     balance: 0.00
+//   };
+//   localStorage.setItem(SELLER_KEY, JSON.stringify(session));
+//   return session;
+// };
 
-export const logoutSeller = () => {
-  localStorage.removeItem(SELLER_KEY);
-};
+// export const logoutSeller = () => {
+//   localStorage.removeItem(SELLER_KEY);
+// };
 
-export const updateSellerProfile = (updatedDetails) => {
-  const current = getSellerSession();
-  if (current) {
-    const merged = { ...current, ...updatedDetails };
-    localStorage.setItem(SELLER_KEY, JSON.stringify(merged));
-    return merged;
-  }
-  return null;
-};
+// export const updateSellerProfile = (updatedDetails) => {
+//   const current = getSellerSession();
+//   if (current) {
+//     const merged = { ...current, ...updatedDetails };
+//     localStorage.setItem(SELLER_KEY, JSON.stringify(merged));
+//     return merged;
+//   }
+//   return null;
+// };
 
 // Product management functions
 export const getProducts = () => {
@@ -264,15 +264,6 @@ export const updateOrderStatus = (orderId, newStatus) => {
   if (idx !== -1) {
     orders[idx].fulfillmentStatus = newStatus;
     localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-
-    // If order was delivered, update seller balance slightly (mock payout)
-    if (newStatus === 'Delivered') {
-      const seller = getSellerSession();
-      if (seller) {
-        seller.balance += orders[idx].totalAmount;
-        localStorage.setItem(SELLER_KEY, JSON.stringify(seller));
-      }
-    }
   }
   return orders;
 };
