@@ -140,9 +140,6 @@ const DEFAULT_ORDERS = [
 
 // Initialization check
 export const initStorage = () => {
-  if (!localStorage.getItem(PRODUCTS_KEY)) {
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-  }
   if (!localStorage.getItem(ORDERS_KEY)) {
     localStorage.setItem(ORDERS_KEY, JSON.stringify(DEFAULT_ORDERS));
   }
