@@ -112,7 +112,7 @@ const Sidebar = ({ onLogout }) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
               return (
-                <li key={item.name}>
+                <ul key={item.name}>
                   <button 
                     onClick={() => handleNav(item.path)} 
                     className={`nav-link ${isActive ? 'active' : ''}`}
@@ -120,7 +120,7 @@ const Sidebar = ({ onLogout }) => {
                     <Icon size={20} />
                     <span>{item.name}</span>
                   </button>
-                </li>
+                </ul>
               );
             })}
           </ul>
