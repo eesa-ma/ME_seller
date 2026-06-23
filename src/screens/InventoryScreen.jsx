@@ -14,7 +14,7 @@ import {
   TrendingUp,
   Image as ImageIcon
 } from 'lucide-react';
-import { getProducts, saveProduct, deleteProduct } from '../utils/storage';
+import { getProducts, saveProduct, deleteProduct, uploadProductImage } from '../utils/product';
 
 const CATEGORIES = ['Wellness', 'Accessories', 'Stationery', 'Apparel', 'Crafts'];
 
@@ -32,15 +32,18 @@ const InventoryScreen = () => {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [images, setImages] = useState(['', '']); // 2-5 images, non-optional
+  const [images, setImages] = useState([]); // Existing URLs
+  const [imageFiles, setImageFiles] = useState([]); // New file uploads
+  const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState('active');
 
   useEffect(() => {
     loadProducts();
   }, []);
 
-  const loadProducts = () => {
-    setProducts(getProducts());
+  const loadProducts = async () => {
+    const data = await getProducts();
+    setProducts(data);
   };
 
   const handleOpenAddModal = () => {
@@ -50,7 +53,8 @@ const InventoryScreen = () => {
     setCategory(CATEGORIES[0]);
     setPrice('');
     setStock('');
-    setImages(['', '']); // Starts with 2 slots
+    setImages([]);
+    setImageFiles([]);
     setStatus('active');
     setIsModalOpen(true);
   };
@@ -62,68 +66,82 @@ const InventoryScreen = () => {
     setCategory(prod.category);
     setPrice(prod.price);
     setStock(prod.stock);
-    // Ensure we load existing images or at least 2 input slots
-    setImages(prod.images && prod.images.length >= 2 ? [...prod.images] : (prod.images ? [...prod.images, ''] : ['', '']));
+    setImages(prod.images ? [...prod.images] : []);
+    setImageFiles([]);
     setStatus(prod.status);
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this listing from your inventory?')) {
-      const updated = deleteProduct(id);
-      setProducts(updated);
+      await deleteProduct(id);
+      loadProducts();
     }
   };
 
-  const handleImageChange = (index, value) => {
-    const updated = [...images];
-    updated[index] = value;
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (images.length + imageFiles.length + files.length > 5) {
+      alert("You can only have up to 5 images in total.");
+      return;
+    }
+    setImageFiles([...imageFiles, ...files]);
+  };
+
+  const handleRemoveExistingImage = (index) => {
+    const updated = images.filter((_, i) => i !== index);
     setImages(updated);
   };
 
-  const handleAddImageField = () => {
-    if (images.length < 5) {
-      setImages([...images, '']);
-    }
+  const handleRemoveNewFile = (index) => {
+    const updated = imageFiles.filter((_, i) => i !== index);
+    setImageFiles(updated);
   };
 
-  const handleRemoveImageField = (index) => {
-    if (images.length > 2) {
-      const updated = images.filter((_, i) => i !== index);
-      setImages(updated);
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !price || stock === '') return;
 
-    // Filter out blank URLs
-    const activeImages = images.filter(url => url.trim() !== '');
-
-    if (activeImages.length < 2) {
-      alert('A product listing requires at least 2 images.');
+    if (images.length + imageFiles.length === 0) {
+      alert('A product listing requires at least 1 image.');
       return;
     }
 
-    const payload = {
-      name,
-      description,
-      category,
-      price: parseFloat(price),
-      stock: parseInt(stock),
-      images: activeImages,
-      status
-    };
+    setIsSaving(true);
+    try {
+      // Upload new files
+      const uploadedUrls = [];
+      for (const file of imageFiles) {
+        const url = await uploadProductImage(file);
+        uploadedUrls.push(url);
+      }
 
-    if (editingProduct) {
-      payload.id = editingProduct.id;
-      payload.salesCount = editingProduct.salesCount;
+      const finalImages = [...images, ...uploadedUrls];
+
+      const payload = {
+        name,
+        description,
+        category,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+        images: finalImages,
+        status
+      };
+
+      if (editingProduct) {
+        payload.id = editingProduct.id;
+        payload.sales_count = editingProduct.salesCount;
+      }
+
+      await saveProduct(payload);
+      await loadProducts();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert("Failed to save product.");
+    } finally {
+      setIsSaving(false);
     }
-
-    saveProduct(payload);
-    loadProducts();
-    setIsModalOpen(false);
   };
 
   // Filtering Logic
@@ -387,46 +405,45 @@ const InventoryScreen = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Product Images * <span className="label-subtitle">(At least 2 and up to 5 image URLs required)</span></label>
-                  <div className="image-urls-list">
-                    {images.map((imgUrl, index) => (
-                      <div key={index} className="image-input-row">
-                        <div className="image-input-field-wrapper">
-                          <span className="image-input-index">Image {index + 1} {index < 2 ? '*' : ''}</span>
-                          <div className="image-field-input-box">
-                            <ImageIcon size={16} className="image-field-icon" />
-                            <input 
-                              type="url" 
-                              className="form-input form-input-with-icon" 
-                              placeholder={index < 2 ? "Required Image URL" : "Optional Image URL"} 
-                              value={imgUrl}
-                              onChange={(e) => handleImageChange(index, e.target.value)}
-                              required={index < 2}
-                            />
-                          </div>
-                          {images.length > 2 && (
-                            <button 
-                              type="button" 
-                              onClick={() => handleRemoveImageField(index)} 
-                              className="remove-image-field-btn"
-                              title="Remove Image Slot"
-                            >
-                              <X size={16} />
-                            </button>
-                          )}
+                  <label>Product Images * <span className="label-subtitle">(Up to 5 images allowed)</span></label>
+                  
+                  {/* Show existing images */}
+                  {images.length > 0 && (
+                    <div className="existing-images-preview" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '15px' }}>
+                      {images.map((url, idx) => (
+                        <div key={idx} style={{ position: 'relative' }}>
+                          <img src={url} alt={`Preview ${idx}`} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
+                          <button type="button" onClick={() => handleRemoveExistingImage(idx)} style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', borderRadius: '50%', border: 'none', cursor: 'pointer', width: '20px', height: '20px' }}>x</button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                  {images.length < 5 && (
-                    <button 
-                      type="button" 
-                      onClick={handleAddImageField} 
-                      className="btn btn-secondary add-image-field-btn"
-                    >
-                      + Add Image URL Slot (Max 5)
-                    </button>
+                      ))}
+                    </div>
                   )}
+
+                  {/* Show new files to upload */}
+                  {imageFiles.length > 0 && (
+                    <div className="new-files-preview" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '15px' }}>
+                      {imageFiles.map((file, idx) => (
+                        <div key={idx} style={{ position: 'relative' }}>
+                          <img src={URL.createObjectURL(file)} alt={`New file ${idx}`} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '2px solid #4ade80' }} />
+                          <button type="button" onClick={() => handleRemoveNewFile(idx)} style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', borderRadius: '50%', border: 'none', cursor: 'pointer', width: '20px', height: '20px' }}>x</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="image-urls-list">
+                    {images.length + imageFiles.length < 5 && (
+                      <div className="image-input-row">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          multiple
+                          onChange={handleFileChange}
+                          className="form-input"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="modal-footer">
@@ -437,8 +454,8 @@ const InventoryScreen = () => {
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editingProduct ? 'Save Changes' : 'Publish Product'}
+                  <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                    {isSaving ? 'Saving...' : editingProduct ? 'Save Changes' : 'Publish Product'}
                   </button>
                 </div>
               </form>

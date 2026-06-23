@@ -10,28 +10,41 @@ import {
   TrendingUp,
   PackageCheck
 } from 'lucide-react';
-import { getProducts, getOrders, getAnalyticsStats } from '../utils/storage';
+import { getOrders, getAnalyticsStats } from '../utils/storage';
+import { getSellerSession } from '../utils/auth';
+import { getProducts } from '../utils/product';
 
 const DashboardHome = () => {
   const navigate = useNavigate();
+  const [seller, setSeller] = useState(null);
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStockItems, setLowStockItems] = useState([]);
 
   useEffect(() => {
-    // Fetch dashboard statistics
-    const metrics = getAnalyticsStats();
-    setStats(metrics);
+    const fetchData = async () => {
+      // Fetch seller session
+      const session = await getSellerSession();
+      setSeller(session);
 
-    // Fetch and sort recent orders (last 5)
-    const allOrders = getOrders();
-    const sorted = [...allOrders].sort((a, b) => new Date(b.date) - new Date(a.date));
-    setRecentOrders(sorted.slice(0, 5));
+      // Fetch products
+      const allProducts = await getProducts();
+      
+      // Fetch dashboard statistics
+      const metrics = getAnalyticsStats(allProducts);
+      setStats(metrics);
 
-    // Fetch low stock items
-    const allProducts = getProducts();
-    const lowStock = allProducts.filter(p => p.stock <= 5);
-    setLowStockItems(lowStock);
+      // Fetch and sort recent orders (last 5)
+      const allOrders = getOrders();
+      const sorted = [...allOrders].sort((a, b) => new Date(b.date) - new Date(a.date));
+      setRecentOrders(sorted.slice(0, 5));
+
+      // Fetch low stock items
+      const lowStock = allProducts.filter(p => p.stock <= 5);
+      setLowStockItems(lowStock);
+    };
+
+    fetchData();
   }, []);
 
   if (!stats) return <div className="loading-placeholder">Loading statistics...</div>;
@@ -50,10 +63,10 @@ const DashboardHome = () => {
   };
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-home">    
       <div className="dashboard-welcome-banner">
         <div>
-          <h2>Welcome back to Mind Empowered Hub</h2>
+          <h2>Welcome back to {seller ? seller.shopName : 'Your Marketplace'}</h2>
           <p>Here is your shop's performance overview for today.</p>
         </div>
         <div className="banner-date">

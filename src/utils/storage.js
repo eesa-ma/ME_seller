@@ -5,80 +5,80 @@ const PRODUCTS_KEY = 'me_seller_products';
 const ORDERS_KEY = 'me_seller_orders';
 
 // Initial pre-populated products
-const DEFAULT_PRODUCTS = [
-  {
-    id: 'prod_1',
-    name: 'Mindful Journal',
-    category: 'Wellness',
-    price: 450,
-    stock: 24,
-    salesCount: 84,
-    description: 'A beautifully designed journal with daily prompts for mental well-being and gratitude.',
-    images: [
-      'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
-      'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400'
-    ],
-    status: 'active'
-  },
-  {
-    id: 'prod_2',
-    name: 'Empowerment Tote Bag',
-    category: 'Accessories',
-    price: 320,
-    stock: 5, // Low stock warning level
-    salesCount: 142,
-    description: 'Durable cotton canvas tote bag featuring motivational artwork by our community artists.',
-    images: [
-      'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
-      'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400',
-      'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=400'
-    ],
-    status: 'active'
-  },
-  {
-    id: 'prod_3',
-    name: 'Self-Care Kit',
-    category: 'Wellness',
-    price: 280,
-    stock: 15,
-    salesCount: 45,
-    description: 'A collection of essential wellness items including calming teas, incense sticks, and a wellness guide.',
-    images: [
-      'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
-      'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400'
-    ],
-    status: 'active'
-  },
-  {
-    id: 'prod_4',
-    name: 'Mental Health Planner',
-    category: 'Stationery',
-    price: 550,
-    stock: 0, // Out of stock
-    salesCount: 68,
-    description: 'A comprehensive weekly planner focused on tracking moods, habits, and self-care routines.',
-    images: [
-      'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
-      'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400'
-    ],
-    status: 'active'
-  },
-  {
-    id: 'prod_7',
-    name: 'ME Community Hoodie',
-    category: 'Apparel',
-    price: 1200,
-    stock: 35,
-    salesCount: 92,
-    description: 'Ultra-soft fleece hoodie featuring the Mind Empowered crest. 100% of proceeds support education programs.',
-    images: [
-      'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
-      'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400',
-      'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=400'
-    ],
-    status: 'active'
-  }
-];
+// const DEFAULT_PRODUCTS = [
+//   {
+//     id: 'prod_1',
+//     name: 'Mindful Journal',
+//     category: 'Wellness',
+//     price: 450,
+//     stock: 24,
+//     salesCount: 84,
+//     description: 'A beautifully designed journal with daily prompts for mental well-being and gratitude.',
+//     images: [
+//       'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
+//       'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400'
+//     ],
+//     status: 'active'
+//   },
+//   {
+//     id: 'prod_2',
+//     name: 'Empowerment Tote Bag',
+//     category: 'Accessories',
+//     price: 320,
+//     stock: 5, // Low stock warning level
+//     salesCount: 142,
+//     description: 'Durable cotton canvas tote bag featuring motivational artwork by our community artists.',
+//     images: [
+//       'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
+//       'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400',
+//       'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=400'
+//     ],
+//     status: 'active'
+//   },
+//   {
+//     id: 'prod_3',
+//     name: 'Self-Care Kit',
+//     category: 'Wellness',
+//     price: 280,
+//     stock: 15,
+//     salesCount: 45,
+//     description: 'A collection of essential wellness items including calming teas, incense sticks, and a wellness guide.',
+//     images: [
+//       'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
+//       'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400'
+//     ],
+//     status: 'active'
+//   },
+//   {
+//     id: 'prod_4',
+//     name: 'Mental Health Planner',
+//     category: 'Stationery',
+//     price: 550,
+//     stock: 0, // Out of stock
+//     salesCount: 68,
+//     description: 'A comprehensive weekly planner focused on tracking moods, habits, and self-care routines.',
+//     images: [
+//       'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
+//       'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400'
+//     ],
+//     status: 'active'
+//   },
+//   {
+//     id: 'prod_7',
+//     name: 'ME Community Hoodie',
+//     category: 'Apparel',
+//     price: 1200,
+//     stock: 35,
+//     salesCount: 92,
+//     description: 'Ultra-soft fleece hoodie featuring the Mind Empowered crest. 100% of proceeds support education programs.',
+//     images: [
+//       'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
+//       'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400',
+//       'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=400'
+//     ],
+//     status: 'active'
+//   }
+// ];
 
 // Initial mock orders
 const DEFAULT_ORDERS = [
@@ -138,16 +138,6 @@ const DEFAULT_ORDERS = [
   }
 ];
 
-const DEFAULT_SELLER = {
-  id: 'sell_me_1',
-  shopName: 'Mind Empowered Crafts',
-  ownerName: 'ME Foundation',
-  email: 'seller@mind-empowered.org',
-  category: 'Wellness & Stationery',
-  logo: null,
-  balance: 18450.00
-};
-
 // Initialization check
 export const initStorage = () => {
   if (!localStorage.getItem(PRODUCTS_KEY)) {
@@ -158,99 +148,7 @@ export const initStorage = () => {
   }
 };
 
-// Seller authentication helper
-export const getSellerSession = () => {
-  const session = localStorage.getItem(SELLER_KEY);
-  return session ? JSON.parse(session) : null;
-};
-
-export const loginSeller = (email, password) => {
-  // Mock login check
-  if (email === 'seller@mind-empowered.org' && password === 'password') {
-    const session = { ...DEFAULT_SELLER };
-    localStorage.setItem(SELLER_KEY, JSON.stringify(session));
-    return session;
-  }
-  // Allow any other email to signup/login for testing with dummy data
-  const session = {
-    id: 'sell_' + Date.now(),
-    shopName: 'My Community Shop',
-    ownerName: email.split('@')[0],
-    email: email,
-    category: 'General',
-    logo: null,
-    balance: 0.00
-  };
-  localStorage.setItem(SELLER_KEY, JSON.stringify(session));
-  return session;
-};
-
-export const registerSeller = (email, password, shopDetails) => {
-  const session = {
-    id: 'sell_' + Date.now(),
-    shopName: shopDetails.shopName || 'ME Craft Shop',
-    ownerName: shopDetails.ownerName || 'ME Volunteer',
-    email: email,
-    category: shopDetails.category || 'Crafts',
-    logo: null,
-    balance: 0.00
-  };
-  localStorage.setItem(SELLER_KEY, JSON.stringify(session));
-  return session;
-};
-
-export const logoutSeller = () => {
-  localStorage.removeItem(SELLER_KEY);
-};
-
-export const updateSellerProfile = (updatedDetails) => {
-  const current = getSellerSession();
-  if (current) {
-    const merged = { ...current, ...updatedDetails };
-    localStorage.setItem(SELLER_KEY, JSON.stringify(merged));
-    return merged;
-  }
-  return null;
-};
-
-// Product management functions
-export const getProducts = () => {
-  initStorage();
-  return JSON.parse(localStorage.getItem(PRODUCTS_KEY)) || [];
-};
-
-export const saveProduct = (product) => {
-  const products = getProducts();
-  if (product.id) {
-    // Edit existing product
-    const idx = products.findIndex(p => p.id === product.id);
-    if (idx !== -1) {
-      products[idx] = { ...products[idx], ...product };
-    }
-  } else {
-    // Add new product
-    const newProduct = {
-      ...product,
-      id: 'prod_' + Date.now(),
-      salesCount: 0,
-      images: product.images || [
-        'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400',
-        'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&q=80&w=400'
-      ],
-      status: product.status || 'active'
-    };
-    products.push(newProduct);
-  }
-  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
-  return products;
-};
-
-export const deleteProduct = (id) => {
-  const products = getProducts();
-  const filtered = products.filter(p => p.id !== id);
-  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(filtered));
-  return filtered;
-};
+// Product management functions moved to product.js
 
 // Order management functions
 export const getOrders = () => {
@@ -264,22 +162,12 @@ export const updateOrderStatus = (orderId, newStatus) => {
   if (idx !== -1) {
     orders[idx].fulfillmentStatus = newStatus;
     localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-
-    // If order was delivered, update seller balance slightly (mock payout)
-    if (newStatus === 'Delivered') {
-      const seller = getSellerSession();
-      if (seller) {
-        seller.balance += orders[idx].totalAmount;
-        localStorage.setItem(SELLER_KEY, JSON.stringify(seller));
-      }
-    }
   }
   return orders;
 };
 
 // Analytics helper
-export const getAnalyticsStats = () => {
-  const products = getProducts();
+export const getAnalyticsStats = (products = []) => {
   const orders = getOrders();
 
   const totalEarnings = orders

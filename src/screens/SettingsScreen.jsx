@@ -11,7 +11,7 @@ import {
   CheckCircle,
   Image as ImageIcon
 } from 'lucide-react';
-import { getSellerSession, updateSellerProfile } from '../utils/storage';
+import { getSellerSession, updateSellerProfile } from '../utils/auth';
 
 const SettingsScreen = () => {
   const [shopName, setShopName] = useState('');
@@ -31,20 +31,27 @@ const SettingsScreen = () => {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const seller = getSellerSession();
-    if (seller) {
-      setShopName(seller.shopName || '');
-      setOwnerName(seller.ownerName || '');
-      setEmail(seller.email || '');
-      setPhone(seller.phone || '9876543210');
-      setCategory(seller.category || 'Wellness');
-      setDescription(seller.description || 'Verified seller partner of the Mind Empowered Community.');
-      setLogo(seller.logo || '');
-      setLocationUrl(seller.locationUrl || '');
-      setBankName(seller.bankName || 'State Bank of India');
-      setAccountNumber(seller.accountNumber || '•••• •••• •••• 9821');
-      setIfsc(seller.ifsc || 'SBIN0008432');
-    }
+    const fetchSession = async () => {
+      try {
+        const seller = await getSellerSession();
+        if (seller) {
+          setShopName(seller.shopName || '');
+          setOwnerName(seller.ownerName || '');
+          setEmail(seller.email || '');
+          setPhone(seller.phone || '9876543210');
+          setCategory(seller.category || 'Wellness');
+          setDescription(seller.description || 'Verified seller partner of the Mind Empowered Community.');
+          setLogo(seller.logo || '');
+          setLocationUrl(seller.locationUrl || '');
+          setBankName(seller.bankName || 'State Bank of India');
+          setAccountNumber(seller.accountNumber || '•••• •••• •••• 9821');
+          setIfsc(seller.ifsc || 'SBIN0008432');
+        }
+      } catch (err) {
+        console.error("Settings session error:", err);
+      }
+    };
+    fetchSession();
   }, []);
 
   const handleLogoUpload = (e) => {
@@ -62,7 +69,7 @@ const SettingsScreen = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSaved(false);
 
@@ -79,13 +86,16 @@ const SettingsScreen = () => {
       ifsc
     };
 
-    const updated = updateSellerProfile(payload);
-    if (updated) {
+    try {
+      await updateSellerProfile(payload);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       
       // Emit a custom window event so the sidebar component knows it has to refresh session
       window.dispatchEvent(new Event('storage'));
+    } catch (err) {
+      console.error("Error updating profile", err);
+      alert("Failed to save settings.");
     }
   };
 
