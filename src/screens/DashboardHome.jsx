@@ -10,8 +10,9 @@ import {
   TrendingUp,
   PackageCheck
 } from 'lucide-react';
-import { getProducts, getOrders, getAnalyticsStats } from '../utils/storage';
+import { getOrders, getAnalyticsStats } from '../utils/storage';
 import { getSellerSession } from '../utils/auth';
+import { getProducts } from '../utils/product';
 
 const DashboardHome = () => {
   const navigate = useNavigate();
@@ -21,26 +22,29 @@ const DashboardHome = () => {
   const [lowStockItems, setLowStockItems] = useState([]);
 
   useEffect(() => {
-    // Fetch seller session
-    const fetchSession = async () => {
+    const fetchData = async () => {
+      // Fetch seller session
       const session = await getSellerSession();
       setSeller(session);
+
+      // Fetch products
+      const allProducts = await getProducts();
+      
+      // Fetch dashboard statistics
+      const metrics = getAnalyticsStats(allProducts);
+      setStats(metrics);
+
+      // Fetch and sort recent orders (last 5)
+      const allOrders = getOrders();
+      const sorted = [...allOrders].sort((a, b) => new Date(b.date) - new Date(a.date));
+      setRecentOrders(sorted.slice(0, 5));
+
+      // Fetch low stock items
+      const lowStock = allProducts.filter(p => p.stock <= 5);
+      setLowStockItems(lowStock);
     };
-    fetchSession();
 
-    // Fetch dashboard statistics
-    const metrics = getAnalyticsStats();
-    setStats(metrics);
-
-    // Fetch and sort recent orders (last 5)
-    const allOrders = getOrders();
-    const sorted = [...allOrders].sort((a, b) => new Date(b.date) - new Date(a.date));
-    setRecentOrders(sorted.slice(0, 5));
-
-    // Fetch low stock items
-    const allProducts = getProducts();
-    const lowStock = allProducts.filter(p => p.stock <= 5);
-    setLowStockItems(lowStock);
+    fetchData();
   }, []);
 
   if (!stats) return <div className="loading-placeholder">Loading statistics...</div>;

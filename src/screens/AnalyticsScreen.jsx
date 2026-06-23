@@ -9,40 +9,47 @@ import {
   Layers,
   ArrowUpRight
 } from 'lucide-react';
-import { getProducts, getAnalyticsStats } from '../utils/storage';
-
+import { getAnalyticsStats } from '../utils/storage';
+import { getProducts } from '../utils/product';
 const AnalyticsScreen = () => {
   const [stats, setStats] = useState(null);
   const [topProducts, setTopProducts] = useState([]);
   const [categoryDistribution, setCategoryDistribution] = useState([]);
 
   useEffect(() => {
-    const metrics = getAnalyticsStats();
-    setStats(metrics);
+    const fetchAnalyticsData = async () => {
+      const allProducts = await getProducts();
+      
+      const metrics = getAnalyticsStats(allProducts);
+      setStats(metrics);
 
-    // Calculate top-selling products (sorted by salesCount desc)
-    const allProducts = getProducts();
-    const sortedProducts = [...allProducts]
-      .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
-    setTopProducts(sortedProducts.slice(0, 5));
+      // Calculate top-selling products (sorted by salesCount desc)
+      const sortedProducts = [...allProducts]
+        .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
+      setTopProducts(sortedProducts.slice(0, 5));
 
-    // Calculate category distribution percentage
-    const categoryTotals = {};
-    let totalSales = 0;
+      // Calculate category distribution percentage
+      const categoryTotals = {};
+      let totalSales = 0;
 
-    allProducts.forEach(prod => {
-      const sales = prod.salesCount || 0;
-      categoryTotals[prod.category] = (categoryTotals[prod.category] || 0) + sales;
-      totalSales += sales;
-    });
+      allProducts.forEach(prod => {
+        const sales = prod.salesCount || 0;
+        categoryTotals[prod.category] = (categoryTotals[prod.category] || 0) + sales;
+        totalSales += sales;
+      });
 
-    const distribution = Object.keys(categoryTotals).map(cat => ({
-      name: cat,
-      sales: categoryTotals[cat],
-      percentage: totalSales > 0 ? Math.round((categoryTotals[cat] / totalSales) * 100) : 0
-    })).sort((a, b) => b.percentage - a.percentage);
+      const distribution = Object.keys(categoryTotals).map(cat => ({
+        name: cat,
+        sales: categoryTotals[cat],
+        percentage: totalSales === 0 ? 0 : Math.round((categoryTotals[cat] / totalSales) * 100)
+      }));
 
-    setCategoryDistribution(distribution);
+      // Sort distribution by percentage
+      distribution.sort((a, b) => b.percentage - a.percentage);
+      setCategoryDistribution(distribution);
+    };
+
+    fetchAnalyticsData();
   }, []);
 
   if (!stats) return <div className="loading-placeholder">Loading analytics...</div>;
