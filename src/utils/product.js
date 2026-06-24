@@ -16,7 +16,10 @@ export const getProducts = async () => {
 
     if (error) throw error;
     
-    return data || [];
+    return data ? data.map(p => ({
+      ...p,
+      salesCount: p.sales_count
+    })) : [];
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
@@ -67,10 +70,13 @@ export const saveProduct = async (productData) => {
 
     if (productData.id) {
       // Update existing product
+      const updatePayload = { ...payload };
+      delete updatePayload.id;
+
       const { data, error } = await supabase
         .schema('marketplace_dataspace')
         .from('products')
-        .update(payload)
+        .update(updatePayload)
         .eq('id', productData.id)
         .eq('seller_id', session.id) // Extra safety check
         .select()
