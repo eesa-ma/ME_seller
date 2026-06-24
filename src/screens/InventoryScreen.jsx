@@ -39,16 +39,16 @@ const InventoryScreen = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState('active');
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
+  async function loadProducts() {
     setIsLoadingProducts(true);
     const data = await getProducts();
     setProducts(data);
     setIsLoadingProducts(false);
-  };
+  }
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   const handleOpenAddModal = () => {
     setEditingProduct(null);

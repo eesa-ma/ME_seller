@@ -11,7 +11,8 @@ import {
   TrendingUp,
   PackageCheck
 } from 'lucide-react';
-import { getOrders, getAnalyticsStats } from '../utils/storage';
+import { getAnalyticsStats } from '../utils/storage';
+import { getOrders } from '../utils/order';
 import { getSellerSession } from '../utils/auth';
 import { getProducts } from '../utils/product';
 
@@ -31,14 +32,14 @@ const DashboardHome = () => {
       // Fetch products
       const allProducts = await getProducts();
       
-      // Fetch dashboard statistics
-      const metrics = getAnalyticsStats(allProducts);
-      setStats(metrics);
-
       // Fetch and sort recent orders (last 5)
-      const allOrders = getOrders();
-      const sorted = [...allOrders].sort((a, b) => new Date(b.date) - new Date(a.date));
+      const allOrders = await getOrders();
+      const sorted = [...allOrders].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       setRecentOrders(sorted.slice(0, 5));
+
+      // Fetch dashboard statistics using both products and orders
+      const metrics = getAnalyticsStats(allProducts, allOrders);
+      setStats(metrics);
 
       // Fetch low stock items
       const lowStock = allProducts.filter(p => p.stock <= 5);
@@ -287,22 +288,22 @@ const DashboardHome = () => {
               ) : (
                 recentOrders.map(order => (
                   <tr key={order.id}>
-                    <td className="order-id">{order.id}</td>
+                    <td className="order-id">{order.id.split('-')[0]}...</td>
                     <td>
                       <div className="customer-cell">
-                        <span className="customer-name">{order.customerName}</span>
-                        <span className="customer-email">{order.customerEmail}</span>
+                        <span className="customer-name">{order.customer_name}</span>
+                        <span className="customer-email">{order.customer_email || order.customer_phone}</span>
                       </div>
                     </td>
-                    <td>{new Date(order.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                    <td>{order.items.reduce((sum, item) => sum + item.quantity, 0)} items</td>
-                    <td className="order-amount">₹{order.totalAmount.toLocaleString('en-IN')}</td>
+                    <td>{new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td>{order.items ? order.items.reduce((sum, item) => sum + item.quantity, 0) : 0} items</td>
+                    <td className="order-amount">₹{parseFloat(order.total_amount || 0).toLocaleString('en-IN')}</td>
                     <td>
                       <span className={`badge ${
-                        order.fulfillmentStatus === 'Delivered' ? 'badge-success' :
-                        order.fulfillmentStatus === 'Shipped' ? 'badge-info' : 'badge-warning'
+                        order.fulfillment_status === 'Delivered' ? 'badge-success' :
+                        order.fulfillment_status === 'Shipped' ? 'badge-info' : 'badge-warning'
                       }`}>
-                        {order.fulfillmentStatus}
+                        {order.fulfillment_status}
                       </span>
                     </td>
                     <td>

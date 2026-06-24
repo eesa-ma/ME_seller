@@ -9,8 +9,10 @@ import {
   Layers,
   ArrowUpRight
 } from 'lucide-react';
-import { getAnalyticsStats } from '../utils/storage';
+import { getOrders } from '../utils/order';
 import { getProducts } from '../utils/product';
+import { getAnalyticsStats } from '../utils/storage';
+import SkeletonLoader from '../components/SkeletonLoader';
 const AnalyticsScreen = () => {
   const [stats, setStats] = useState(null);
   const [topProducts, setTopProducts] = useState([]);
@@ -19,8 +21,9 @@ const AnalyticsScreen = () => {
   useEffect(() => {
     const fetchAnalyticsData = async () => {
       const allProducts = await getProducts();
+      const allOrders = await getOrders();
       
-      const metrics = getAnalyticsStats(allProducts);
+      const metrics = getAnalyticsStats(allProducts, allOrders);
       setStats(metrics);
 
       // Calculate top-selling products (sorted by salesCount desc)
@@ -52,7 +55,40 @@ const AnalyticsScreen = () => {
     fetchAnalyticsData();
   }, []);
 
-  if (!stats) return <div className="loading-placeholder">Loading analytics...</div>;
+  if (!stats) {
+    return (
+      <div className="analytics-screen">
+        <div className="analytics-header">
+          <div>
+            <div className="skeleton skeleton-title" style={{ width: '300px', height: '32px', marginBottom: '8px' }}></div>
+            <div className="skeleton skeleton-text" style={{ width: '400px' }}></div>
+          </div>
+        </div>
+        
+        <div className="analytics-metrics-grid">
+          <SkeletonLoader type="card" count={3} />
+        </div>
+
+        <div className="analytics-layout-split">
+          <div className="card analytics-chart-card">
+            <div className="skeleton skeleton-title" style={{ width: '200px', marginBottom: '8px' }}></div>
+            <div className="skeleton skeleton-text" style={{ width: '150px', marginBottom: '24px' }}></div>
+            <div className="chart-grid-bars" style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', height: '200px' }}>
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="skeleton" style={{ flex: 1, height: `${Math.random() * 80 + 20}%`, borderRadius: '4px' }}></div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="card analytics-category-card">
+            <div className="skeleton skeleton-title" style={{ width: '180px', marginBottom: '8px' }}></div>
+            <div className="skeleton skeleton-text" style={{ width: '120px', marginBottom: '24px' }}></div>
+            <SkeletonLoader type="table-row" count={4} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="analytics-screen">
