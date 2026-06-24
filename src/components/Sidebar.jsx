@@ -12,7 +12,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { getSellerSession, logoutSeller } from '../utils/storage';
+import { getSellerSession, logoutSeller } from '../utils/auth';
 
 const Sidebar = ({ onLogout }) => {
   const navigate = useNavigate();
@@ -22,7 +22,15 @@ const Sidebar = ({ onLogout }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    setSeller(getSellerSession());
+    const fetchSession = async () => {
+      try {
+        const session = await getSellerSession();
+        setSeller(session);
+      } catch (err) {
+        console.error("Sidebar session error:", err);
+      }
+    };
+    fetchSession();
   }, [location]);
 
   useEffect(() => {
@@ -47,10 +55,14 @@ const Sidebar = ({ onLogout }) => {
     setMobileOpen(false);
   };
 
-  const handleLogoutClick = () => {
-    logoutSeller();
-    if (onLogout) onLogout();
-    navigate('/auth');
+  const handleLogoutClick = async () => {
+    try {
+      await logoutSeller();
+      if (onLogout) onLogout();
+      navigate('/auth');
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   };
 
   return (
@@ -100,7 +112,7 @@ const Sidebar = ({ onLogout }) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
               return (
-                <li key={item.name}>
+                <ul key={item.name}>
                   <button 
                     onClick={() => handleNav(item.path)} 
                     className={`nav-link ${isActive ? 'active' : ''}`}
@@ -108,7 +120,7 @@ const Sidebar = ({ onLogout }) => {
                     <Icon size={20} />
                     <span>{item.name}</span>
                   </button>
-                </li>
+                </ul>
               );
             })}
           </ul>

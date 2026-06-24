@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { loginSeller, registerSeller } from '../utils/storage';
+import { loginSeller, registerSeller } from '../utils/auth';
 import { LogIn, UserPlus, Mail, Lock, ShoppingBag, ShieldCheck } from 'lucide-react';
 
 const AuthScreen = ({ onLogin }) => {
@@ -14,7 +14,8 @@ const AuthScreen = ({ onLogin }) => {
   const [category, setCategory] = useState('Wellness');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  //HANDLE  SUBMIT
+   const handleSubmit = async (e) => { 
     e.preventDefault();
     setError('');
 
@@ -24,33 +25,36 @@ const AuthScreen = ({ onLogin }) => {
     }
 
     if (isLogin) {
-      const session = loginSeller(email, password);
-      if (session) {
+      try {
+        await loginSeller(email, password); 
         if (onLogin) onLogin();
         navigate('/');
-      } else {
-        setError('Invalid seller credentials.');
+      } catch (err) {
+        console.error("Login Error:", err);
+        setError(err.message || 'Login failed. Please check your credentials.');
       }
     } else {
       if (!shopName || !ownerName) {
         setError('Please fill in all shop and owner details.');
         return;
       }
-      const session = registerSeller(email, password, { shopName, ownerName, category });
-      if (session) {
+      
+      try {
+        await registerSeller(email, password, { shopName, ownerName, category }); // await the Supabase call
         if (onLogin) onLogin();
         navigate('/');
-      } else {
-        setError('Registration failed.');
+      } catch (err) {
+        console.error("Registration Error:", err);
+        setError(err.message || 'Registration failed.');
       }
     }
   };
-
-  const handleQuickLogin = () => {
-    setEmail('seller@mind-empowered.org');
-    setPassword('password');
-    setIsLogin(true);
-  };
+ 
+  // const handleQuickLogin = () => {
+  //   setEmail('seller@mind-empowered.org');
+  //   setPassword('password');
+  //   setIsLogin(true);
+  // };
 
   return (
     <div className="auth-container">
@@ -181,7 +185,7 @@ const AuthScreen = ({ onLogin }) => {
             </button>
           </form>
 
-          {isLogin && (
+          {/* isLogin && (
             <div className="demo-login-box">
               <div className="demo-badge">Demo Account Available</div>
               <p>Quick login to view mock store settings, products, and sales logs:</p>
@@ -193,7 +197,7 @@ const AuthScreen = ({ onLogin }) => {
                 Use default credential
               </button>
             </div>
-          )}
+          ) */}
         </div>
       </motion.div>
 
@@ -346,6 +350,7 @@ const AuthScreen = ({ onLogin }) => {
           margin-top: 1rem;
         }
 
+        /*
         .demo-login-box {
           border-top: 1px dashed var(--me-cream-border);
           padding-top: 1.5rem;
@@ -383,6 +388,7 @@ const AuthScreen = ({ onLogin }) => {
         .quick-login-btn:hover {
           background: var(--me-cream);
         }
+        */
 
         @media (max-width: 480px) {
           .auth-card {

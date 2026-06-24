@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  X, 
-  Package, 
-  Layers, 
-  Eye, 
-  EyeOff, 
+import {
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
+  X,
+  Package,
+  Layers,
+  Eye,
+  EyeOff,
   ArrowUpDown,
   TrendingUp,
   Image as ImageIcon
 } from 'lucide-react';
-import { getProducts, saveProduct, deleteProduct } from '../utils/storage';
+import { getProducts, saveProduct, deleteProduct, uploadProductImage } from '../utils/product';
 
 const CATEGORIES = ['Wellness', 'Accessories', 'Stationery', 'Apparel', 'Crafts'];
 
 const InventoryScreen = () => {
   const [products, setProducts] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [stockFilter, setStockFilter] = useState('All');
@@ -32,16 +34,21 @@ const InventoryScreen = () => {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [images, setImages] = useState(['', '']); // 2-5 images, non-optional
+  const [images, setImages] = useState([]); // Existing URLs
+  const [imageFiles, setImageFiles] = useState([]); // New file uploads
+  const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState('active');
+
+  async function loadProducts() {
+    setIsLoadingProducts(true);
+    const data = await getProducts();
+    setProducts(data);
+    setIsLoadingProducts(false);
+  }
 
   useEffect(() => {
     loadProducts();
   }, []);
-
-  const loadProducts = () => {
-    setProducts(getProducts());
-  };
 
   const handleOpenAddModal = () => {
     setEditingProduct(null);
@@ -50,7 +57,8 @@ const InventoryScreen = () => {
     setCategory(CATEGORIES[0]);
     setPrice('');
     setStock('');
-    setImages(['', '']); // Starts with 2 slots
+    setImages([]);
+    setImageFiles([]);
     setStatus('active');
     setIsModalOpen(true);
   };
@@ -62,77 +70,95 @@ const InventoryScreen = () => {
     setCategory(prod.category);
     setPrice(prod.price);
     setStock(prod.stock);
-    // Ensure we load existing images or at least 2 input slots
-    setImages(prod.images && prod.images.length >= 2 ? [...prod.images] : (prod.images ? [...prod.images, ''] : ['', '']));
+    setImages(prod.images ? [...prod.images] : []);
+    setImageFiles([]);
     setStatus(prod.status);
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this listing from your inventory?')) {
-      const updated = deleteProduct(id);
-      setProducts(updated);
+      await deleteProduct(id);
+      loadProducts();
     }
   };
 
-  const handleImageChange = (index, value) => {
-    const updated = [...images];
-    updated[index] = value;
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (images.length + imageFiles.length + files.length > 5) {
+      alert("You can only have up to 5 images in total.");
+      return;
+    }
+    setImageFiles([...imageFiles, ...files]);
+  };
+
+  const handleRemoveExistingImage = (index) => {
+    const updated = images.filter((_, i) => i !== index);
     setImages(updated);
   };
 
-  const handleAddImageField = () => {
-    if (images.length < 5) {
-      setImages([...images, '']);
-    }
+  const handleRemoveNewFile = (index) => {
+    const updated = imageFiles.filter((_, i) => i !== index);
+    setImageFiles(updated);
   };
 
-  const handleRemoveImageField = (index) => {
-    if (images.length > 2) {
-      const updated = images.filter((_, i) => i !== index);
-      setImages(updated);
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !price || stock === '') return;
 
-    // Filter out blank URLs
-    const activeImages = images.filter(url => url.trim() !== '');
-
-    if (activeImages.length < 2) {
-      alert('A product listing requires at least 2 images.');
+    if (!name.trim() || price === '' || price === null || stock === '' || stock === null) {
+      alert("Please fill out all required fields (Name, Price, and Stock).");
       return;
     }
 
-    const payload = {
-      name,
-      description,
-      category,
-      price: parseFloat(price),
-      stock: parseInt(stock),
-      images: activeImages,
-      status
-    };
-
-    if (editingProduct) {
-      payload.id = editingProduct.id;
-      payload.salesCount = editingProduct.salesCount;
+    if (images.length + imageFiles.length === 0) {
+      alert('A product listing requires at least 1 image.');
+      return;
     }
 
-    saveProduct(payload);
-    loadProducts();
-    setIsModalOpen(false);
+    setIsSaving(true);
+    try {
+      // Upload new files
+      const uploadedUrls = [];
+      for (const file of imageFiles) {
+        const url = await uploadProductImage(file);
+        uploadedUrls.push(url);
+      }
+
+      const finalImages = [...images, ...uploadedUrls];
+
+      const payload = {
+        name,
+        description,
+        category,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+        images: finalImages,
+        status
+      };
+
+      if (editingProduct) {
+        payload.id = editingProduct.id;
+        payload.sales_count = editingProduct.salesCount;
+      }
+
+      await saveProduct(payload);
+      await loadProducts();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert("Failed to save product.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Filtering Logic
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
-                          p.description.toLowerCase().includes(search.toLowerCase());
-    
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.description.toLowerCase().includes(search.toLowerCase());
+
     const matchesCategory = categoryFilter === 'All' || p.category === categoryFilter;
-    
+
     let matchesStock = true;
     if (stockFilter === 'OutOfStock') matchesStock = p.stock === 0;
     else if (stockFilter === 'LowStock') matchesStock = p.stock > 0 && p.stock <= 5;
@@ -159,9 +185,9 @@ const InventoryScreen = () => {
         <div className="filters-grid">
           <div className="search-box">
             <Search size={18} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search product name or keywords..." 
+            <input
+              type="text"
+              placeholder="Search product name or keywords..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -207,7 +233,9 @@ const InventoryScreen = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.length === 0 ? (
+              {isLoadingProducts ? (
+                <SkeletonLoader type="table-row" count={5} />
+              ) : filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="empty-catalog-row">
                     <Package size={48} className="empty-icon" />
@@ -219,9 +247,9 @@ const InventoryScreen = () => {
                   <tr key={prod.id}>
                     <td>
                       <div className="product-info-cell">
-                        <img 
-                          src={(prod.images && prod.images[0]) || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400'} 
-                          alt={prod.name} 
+                        <img
+                          src= {prod.images && prod.images[0]}
+                          alt= {prod.name}
                           className="product-thumbnail"
                         />
                         <div className="product-info-text">
@@ -236,10 +264,9 @@ const InventoryScreen = () => {
                     <td className="product-price">₹{prod.price.toLocaleString('en-IN')}</td>
                     <td>
                       <div className="stock-level-cell">
-                        <span className={`badge ${
-                          prod.stock === 0 ? 'badge-danger' : 
-                          prod.stock <= 5 ? 'badge-warning' : 'badge-success'
-                        }`}>
+                        <span className={`badge ${prod.stock === 0 ? 'badge-danger' :
+                            prod.stock <= 5 ? 'badge-warning' : 'badge-success'
+                          }`}>
                           {prod.stock === 0 ? 'Out of Stock' : `${prod.stock} units`}
                         </span>
                       </div>
@@ -252,21 +279,21 @@ const InventoryScreen = () => {
                     </td>
                     <td>
                       <span className={`badge ${prod.status === 'active' ? 'badge-success' : 'badge-warning'}`}>
-                        {prod.status === 'active' ? <Eye size={12} style={{marginRight: '4px'}} /> : <EyeOff size={12} style={{marginRight: '4px'}} />}
+                        {prod.status === 'active' ? <Eye size={12} style={{ marginRight: '4px' }} /> : <EyeOff size={12} style={{ marginRight: '4px' }} />}
                         {prod.status}
                       </span>
                     </td>
                     <td>
                       <div className="actions-cell">
-                        <button 
-                          onClick={() => handleOpenEditModal(prod)} 
+                        <button
+                          onClick={() => handleOpenEditModal(prod)}
                           className="action-btn edit-btn"
                           title="Edit Listing"
                         >
                           <Edit2 size={16} />
                         </button>
-                        <button 
-                          onClick={() => handleDelete(prod.id)} 
+                        <button
+                          onClick={() => handleDelete(prod.id)}
                           className="action-btn delete-btn"
                           title="Delete Listing"
                         >
@@ -286,7 +313,7 @@ const InventoryScreen = () => {
       <AnimatePresence>
         {isModalOpen && (
           <div className="modal-overlay">
-            <motion.div 
+            <motion.div
               className="modal-card"
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -303,23 +330,23 @@ const InventoryScreen = () => {
               <form onSubmit={handleSubmit} className="modal-form">
                 <div className="form-group">
                   <label htmlFor="prod-name">Product Name *</label>
-                  <input 
-                    type="text" 
-                    id="prod-name" 
-                    className="form-input" 
-                    placeholder="e.g. Lavender Herbal Soap" 
+                  <input
+                    type="text"
+                    id="prod-name"
+                    className="form-input"
+                    placeholder="e.g. Lavender Herbal Soap"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    required 
+                    required
                   />
                 </div>
 
                 <div className="form-double-column">
                   <div className="form-group">
                     <label htmlFor="prod-category">Category *</label>
-                    <select 
-                      id="prod-category" 
-                      className="form-input" 
+                    <select
+                      id="prod-category"
+                      className="form-input"
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                     >
@@ -331,9 +358,9 @@ const InventoryScreen = () => {
 
                   <div className="form-group">
                     <label htmlFor="prod-status">Visibility Status</label>
-                    <select 
-                      id="prod-status" 
-                      className="form-input" 
+                    <select
+                      id="prod-status"
+                      className="form-input"
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
                     >
@@ -346,40 +373,40 @@ const InventoryScreen = () => {
                 <div className="form-double-column">
                   <div className="form-group">
                     <label htmlFor="prod-price">Retail Price (₹) *</label>
-                    <input 
-                      type="number" 
-                      id="prod-price" 
-                      className="form-input" 
-                      placeholder="e.g. 350" 
+                    <input
+                      type="number"
+                      id="prod-price"
+                      className="form-input"
+                      placeholder="e.g. 350"
                       min="0"
                       step="0.01"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
 
                   <div className="form-group">
                     <label htmlFor="prod-stock">Stock Quantity *</label>
-                    <input 
-                      type="number" 
-                      id="prod-stock" 
-                      className="form-input" 
-                      placeholder="e.g. 20" 
+                    <input
+                      type="number"
+                      id="prod-stock"
+                      className="form-input"
+                      placeholder="e.g. 20"
                       min="0"
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="prod-desc">Product Description</label>
-                  <textarea 
-                    id="prod-desc" 
-                    className="form-input text-area-input" 
-                    placeholder="Describe materials, sizing, fragrance details, and how it is made..." 
+                  <textarea
+                    id="prod-desc"
+                    className="form-input text-area-input"
+                    placeholder="Describe materials, sizing, fragrance details, and how it is made..."
                     rows="3"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -387,58 +414,57 @@ const InventoryScreen = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Product Images * <span className="label-subtitle">(At least 2 and up to 5 image URLs required)</span></label>
-                  <div className="image-urls-list">
-                    {images.map((imgUrl, index) => (
-                      <div key={index} className="image-input-row">
-                        <div className="image-input-field-wrapper">
-                          <span className="image-input-index">Image {index + 1} {index < 2 ? '*' : ''}</span>
-                          <div className="image-field-input-box">
-                            <ImageIcon size={16} className="image-field-icon" />
-                            <input 
-                              type="url" 
-                              className="form-input form-input-with-icon" 
-                              placeholder={index < 2 ? "Required Image URL" : "Optional Image URL"} 
-                              value={imgUrl}
-                              onChange={(e) => handleImageChange(index, e.target.value)}
-                              required={index < 2}
-                            />
-                          </div>
-                          {images.length > 2 && (
-                            <button 
-                              type="button" 
-                              onClick={() => handleRemoveImageField(index)} 
-                              className="remove-image-field-btn"
-                              title="Remove Image Slot"
-                            >
-                              <X size={16} />
-                            </button>
-                          )}
+                  <label>Product Images * <span className="label-subtitle">(Up to 5 images allowed)</span></label>
+
+                  {/* Show existing images */}
+                  {images.length > 0 && (
+                    <div className="existing-images-preview" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '15px' }}>
+                      {images.map((url, idx) => (
+                        <div key={idx} style={{ position: 'relative' }}>
+                          <img src={url} alt={`Preview ${idx}`} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
+                          <button type="button" onClick={() => handleRemoveExistingImage(idx)} style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', borderRadius: '50%', border: 'none', cursor: 'pointer', width: '20px', height: '20px' }}>x</button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                  {images.length < 5 && (
-                    <button 
-                      type="button" 
-                      onClick={handleAddImageField} 
-                      className="btn btn-secondary add-image-field-btn"
-                    >
-                      + Add Image URL Slot (Max 5)
-                    </button>
+                      ))}
+                    </div>
                   )}
+
+                  {/* Show new files to upload */}
+                  {imageFiles.length > 0 && (
+                    <div className="new-files-preview" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '15px' }}>
+                      {imageFiles.map((file, idx) => (
+                        <div key={idx} style={{ position: 'relative' }}>
+                          <img src={URL.createObjectURL(file)} alt={`New file ${idx}`} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '2px solid #4ade80' }} />
+                          <button type="button" onClick={() => handleRemoveNewFile(idx)} style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', borderRadius: '50%', border: 'none', cursor: 'pointer', width: '20px', height: '20px' }}>x</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="image-urls-list">
+                    {images.length + imageFiles.length < 5 && (
+                      <div className="image-input-row">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleFileChange}
+                          className="form-input"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)} 
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
                     className="btn btn-secondary"
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editingProduct ? 'Save Changes' : 'Publish Product'}
+                  <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                    {isSaving ? 'Saving...' : editingProduct ? 'Save Changes' : 'Publish Product'}
                   </button>
                 </div>
               </form>

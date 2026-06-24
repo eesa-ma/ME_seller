@@ -11,43 +11,94 @@ import {
   Truck,
   Box,
   X,
-  IndianRupee
+  IndianRupee,
+  Link
 } from 'lucide-react';
-import { getOrders, updateOrderStatus } from '../utils/storage';
+import { getOrders, updateOrderStatus } from '../utils/order';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 const OrdersScreen = () => {
-  const [orders, setProductsOrders] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Tracking inputs for shipping
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [courierPartner, setCourierPartner] = useState('');
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  async function loadOrders() {
+    setIsLoading(true);
+    const data = await getOrders();
+    setOrders(data);
+    setIsLoading(false);
+  }
 
   useEffect(() => {
     loadOrders();
   }, []);
 
-  const loadOrders = () => {
-    setProductsOrders(getOrders());
-  };
+  const handleStatusChange = async (orderId, nextStatus) => {
+    setIsUpdatingStatus(true);
+    try {
+      let trackingInfo = null;
+      if (nextStatus === 'Shipped') {
+        if (!trackingNumber || !courierPartner) {
+          alert("Please enter both courier partner and tracking number.");
+          setIsUpdatingStatus(false);
+          return;
+        }
+        trackingInfo = { trackingNumber, courierPartner };
+      }
 
-  const handleStatusChange = (orderId, nextStatus) => {
-    const updated = updateOrderStatus(orderId, nextStatus);
-    setProductsOrders(updated);
+      await updateOrderStatus(orderId, nextStatus, trackingInfo);
+      
+      // Update local state to reflect change without refetching immediately
+      setOrders(prevOrders => prevOrders.map(o => {
+        if (o.id === orderId) {
+          return {
+            ...o,
+            fulfillment_status: nextStatus,
+            ...(trackingInfo ? {
+              tracking_number: trackingInfo.trackingNumber,
+              courier_partner: trackingInfo.courierPartner
+            } : {})
+          };
+        }
+        return o;
+      }));
     
     // Update the currently viewed order modal state too
     if (selectedOrder && selectedOrder.id === orderId) {
       setSelectedOrder(prev => ({
         ...prev,
-        fulfillmentStatus: nextStatus
+        fulfillment_status: nextStatus,
+        ...(trackingInfo && {
+          tracking_number: trackingInfo.trackingNumber,
+          courier_partner: trackingInfo.courierPartner
+        })
       }));
+      // Reset inputs
+      if (nextStatus === 'Shipped') {
+        setTrackingNumber('');
+        setCourierPartner('');
+      }
     }
-  };
+  } catch (error) {
+    alert("Failed to update status.");
+  } finally {
+    setIsUpdatingStatus(false);
+  }
+};
 
   // Filter orders by tab and search
   const filteredOrders = orders.filter(order => {
-    const matchesTab = activeTab === 'All' || order.fulfillmentStatus === activeTab;
+    const matchesTab = activeTab === 'All' || order.fulfillment_status === activeTab;
     const matchesSearch = order.id.toLowerCase().includes(search.toLowerCase()) || 
-                          order.customerName.toLowerCase().includes(search.toLowerCase()) ||
-                          order.customerEmail.toLowerCase().includes(search.toLowerCase());
+                          (order.customer_name || '').toLowerCase().includes(search.toLowerCase()) ||
+                          (order.customer_email || '').toLowerCase().includes(search.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -96,7 +147,9 @@ const OrdersScreen = () => {
 
       {/* Orders Grid/List */}
       <div className="orders-list-wrapper">
-        {filteredOrders.length === 0 ? (
+        {isLoading ? (
+          <SkeletonLoader />
+        ) : filteredOrders.length === 0 ? (
           <div className="card empty-orders-card">
             <ClipboardList size={48} className="empty-icon" />
             <p>No orders found under "{activeTab}" status.</p>
@@ -113,30 +166,30 @@ const OrdersScreen = () => {
               >
                 <div className="order-item-header">
                   <div>
-                    <span className="order-badge-id">{order.id}</span>
+                    <span className="order-badge-id">{order.id.split('-')[0]}...</span>
                     <span className="order-date-label">
-                      <Calendar size={12} style={{marginRight: '4px'}} /> {order.date}
+                      <Calendar size={12} style={{marginRight: '4px'}} /> {new Date(order.created_at).toLocaleDateString()}
                     </span>
                   </div>
                   <span className={`badge ${
-                    order.fulfillmentStatus === 'Delivered' ? 'badge-success' :
-                    order.fulfillmentStatus === 'Shipped' ? 'badge-info' : 'badge-warning'
+                    order.fulfillment_status === 'Delivered' ? 'badge-success' :
+                    order.fulfillment_status === 'Shipped' ? 'badge-info' : 'badge-warning'
                   }`}>
-                    {getFulfillmentIcon(order.fulfillmentStatus)}
-                    <span style={{marginLeft: '4px'}}>{order.fulfillmentStatus}</span>
+                    {getFulfillmentIcon(order.fulfillment_status)}
+                    <span style={{marginLeft: '4px'}}>{order.fulfillment_status}</span>
                   </span>
                 </div>
 
                 <div className="order-item-body">
                   <div className="order-customer-details">
-                    <h4>{order.customerName}</h4>
-                    <span>{order.customerEmail}</span>
+                    <h4>{order.customer_name}</h4>
+                    <span>{order.customer_email || order.customer_phone}</span>
                   </div>
 
                   <div className="order-items-preview">
-                    {order.items.map((item, idx) => (
+                    {order.items && order.items.map((item, idx) => (
                       <div key={idx} className="preview-row">
-                        <span>{item.productName} <strong className="preview-qty">x{item.quantity}</strong></span>
+                        <span>{item.productName || item.name} <strong className="preview-qty">x{item.quantity}</strong></span>
                         <span>₹{item.price * item.quantity}</span>
                       </div>
                     ))}
@@ -144,7 +197,7 @@ const OrdersScreen = () => {
 
                   <div className="order-total-amount">
                     <span>Total Amount</span>
-                    <span className="total-val">₹{order.totalAmount}</span>
+                    <span className="total-val">₹{order.total_amount}</span>
                   </div>
                 </div>
 
@@ -157,17 +210,18 @@ const OrdersScreen = () => {
                   </button>
 
                   <div className="fulfillment-actions">
-                    {order.fulfillmentStatus === 'Processing' && (
+                    {order.fulfillment_status === 'Processing' && (
                       <button 
-                        onClick={() => handleStatusChange(order.id, 'Shipped')} 
+                        onClick={() => setSelectedOrder(order)} 
                         className="btn btn-primary btn-sm btn-action-ship"
                       >
                         <Truck size={14} /> Ship Order
                       </button>
                     )}
-                    {order.fulfillmentStatus === 'Shipped' && (
+                    {order.fulfillment_status === 'Shipped' && (
                       <button 
                         onClick={() => handleStatusChange(order.id, 'Delivered')} 
+                        disabled={isUpdatingStatus}
                         className="btn btn-primary btn-sm btn-action-deliver"
                       >
                         <CheckCircle size={14} /> Mark Delivered
@@ -193,10 +247,14 @@ const OrdersScreen = () => {
             >
               <div className="modal-header">
                 <div>
-                  <h3>Order Details — {selectedOrder.id}</h3>
-                  <span className="modal-subtitle">Received on {selectedOrder.date}</span>
+                  <h3>Order Details — {selectedOrder.id.split('-')[0]}</h3>
+                  <span className="modal-subtitle">Received on {new Date(selectedOrder.created_at).toLocaleString()}</span>
                 </div>
-                <button onClick={() => setSelectedOrder(null)} className="close-btn">
+                <button onClick={() => {
+                  setSelectedOrder(null);
+                  setTrackingNumber('');
+                  setCourierPartner('');
+                }} className="close-btn">
                   <X size={20} />
                 </button>
               </div>
@@ -209,14 +267,25 @@ const OrdersScreen = () => {
                     <div className="shipping-info-item">
                       <MapPin size={18} className="shipping-icon" />
                       <div>
-                        <strong>{selectedOrder.customerName}</strong>
-                        <p>{selectedOrder.shippingAddress}</p>
+                        <strong>{selectedOrder.customer_name}</strong>
+                        <p>{selectedOrder.shipping_address}</p>
+                        {selectedOrder.customer_notes && (
+                           <p className="order-notes"><strong>Note:</strong> {selectedOrder.customer_notes}</p>
+                        )}
                       </div>
                     </div>
-                    <div className="shipping-info-item">
-                      <Mail size={18} className="shipping-icon" />
-                      <p>{selectedOrder.customerEmail}</p>
-                    </div>
+                    {selectedOrder.customer_email && (
+                      <div className="shipping-info-item">
+                        <Mail size={18} className="shipping-icon" />
+                        <p>{selectedOrder.customer_email}</p>
+                      </div>
+                    )}
+                    {selectedOrder.customer_phone && (
+                      <div className="shipping-info-item">
+                        <span className="shipping-icon">📞</span>
+                        <p>{selectedOrder.customer_phone}</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Payment Details */}
@@ -224,36 +293,68 @@ const OrdersScreen = () => {
                     <h4>Fulfillment & Payment</h4>
                     <div className="payment-row">
                       <span>Payment Status:</span>
-                      <span className="badge badge-success">Paid via Online Payout</span>
+                      <span className="badge badge-success">{selectedOrder.payment_status || 'Paid'}</span>
                     </div>
+                    {selectedOrder.payment_method && (
+                      <div className="payment-row">
+                        <span>Method:</span>
+                        <span>{selectedOrder.payment_method}</span>
+                      </div>
+                    )}
                     <div className="payment-row">
                       <span>Fulfillment Status:</span>
                       <span className={`badge ${
-                        selectedOrder.fulfillmentStatus === 'Delivered' ? 'badge-success' :
-                        selectedOrder.fulfillmentStatus === 'Shipped' ? 'badge-info' : 'badge-warning'
+                        selectedOrder.fulfillment_status === 'Delivered' ? 'badge-success' :
+                        selectedOrder.fulfillment_status === 'Shipped' ? 'badge-info' : 'badge-warning'
                       }`}>
-                        {selectedOrder.fulfillmentStatus}
+                        {selectedOrder.fulfillment_status}
                       </span>
                     </div>
+                    
+                    {selectedOrder.tracking_number && (
+                      <div className="tracking-details">
+                        <p><strong>Courier:</strong> {selectedOrder.courier_partner}</p>
+                        <p><strong>Tracking #:</strong> {selectedOrder.tracking_number}</p>
+                      </div>
+                    )}
 
                     <div className="payment-flow-updater">
-                      {selectedOrder.fulfillmentStatus === 'Processing' && (
-                        <button 
-                          onClick={() => handleStatusChange(selectedOrder.id, 'Shipped')} 
-                          className="btn btn-primary w-full"
-                        >
-                          <Truck size={16} /> Mark as Shipped
-                        </button>
+                      {selectedOrder.fulfillment_status === 'Processing' && (
+                        <div className="shipping-input-box">
+                          <h5>Enter Shipping Details</h5>
+                          <input 
+                            type="text" 
+                            placeholder="Courier Partner (e.g. BlueDart)"
+                            value={courierPartner}
+                            onChange={e => setCourierPartner(e.target.value)}
+                            className="tracking-input"
+                          />
+                          <input 
+                            type="text" 
+                            placeholder="Tracking Number"
+                            value={trackingNumber}
+                            onChange={e => setTrackingNumber(e.target.value)}
+                            className="tracking-input"
+                          />
+                          <button 
+                            onClick={() => handleStatusChange(selectedOrder.id, 'Shipped')} 
+                            disabled={isUpdatingStatus}
+                            className="btn btn-primary w-full"
+                          >
+                            <Truck size={16} /> Mark as Shipped
+                          </button>
+                        </div>
                       )}
-                      {selectedOrder.fulfillmentStatus === 'Shipped' && (
+                      {selectedOrder.fulfillment_status === 'Shipped' && (
                         <button 
                           onClick={() => handleStatusChange(selectedOrder.id, 'Delivered')} 
+                          disabled={isUpdatingStatus}
                           className="btn btn-primary w-full"
                         >
                           <CheckCircle size={16} /> Mark as Fully Delivered
                         </button>
                       )}
-                      {selectedOrder.fulfillmentStatus === 'Delivered' && (
+                      {selectedOrder.fulfillment_status === 'Delivered' && (
                         <div className="success-delivery-badge">
                           <CheckCircle size={18} /> Payout credited to your balance
                         </div>
@@ -275,17 +376,23 @@ const OrdersScreen = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedOrder.items.map((item, idx) => (
+                      {selectedOrder.items && selectedOrder.items.map((item, idx) => (
                         <tr key={idx}>
-                          <td>{item.productName}</td>
+                          <td>{item.productName || item.name}</td>
                           <td>₹{item.price}</td>
                           <td>{item.quantity} units</td>
                           <td>₹{item.price * item.quantity}</td>
                         </tr>
                       ))}
+                      {parseFloat(selectedOrder.shipping_fee || 0) > 0 && (
+                        <tr className="breakdown-fee-row">
+                          <td colSpan="3">Shipping Fee</td>
+                          <td>₹{selectedOrder.shipping_fee}</td>
+                        </tr>
+                      )}
                       <tr className="breakdown-total-row">
                         <td colSpan="3">Total Grand Amount</td>
-                        <td className="grand-total">₹{selectedOrder.totalAmount}</td>
+                        <td className="grand-total">₹{selectedOrder.total_amount}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -625,6 +732,47 @@ const OrdersScreen = () => {
           font-size: 1rem;
           color: var(--accent);
           font-family: 'Montserrat', sans-serif;
+        }
+
+        .shipping-input-box {
+          background: var(--bg-secondary);
+          padding: 1rem;
+          border-radius: 8px;
+          border: 1px solid var(--border);
+        }
+
+        .shipping-input-box h5 {
+          margin-bottom: 0.75rem;
+          color: var(--text-secondary);
+          font-size: 0.8rem;
+          text-transform: uppercase;
+        }
+
+        .tracking-input {
+          width: 100%;
+          padding: 0.75rem;
+          margin-bottom: 0.75rem;
+          background: var(--bg-primary);
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          outline: none;
+        }
+
+        .tracking-input:focus {
+          border-color: var(--accent);
+        }
+
+        .tracking-details {
+          margin-top: 1rem;
+          padding-top: 0.75rem;
+          border-top: 1px dashed var(--border);
+          font-size: 0.85rem;
+        }
+        
+        .order-notes {
+          margin-top: 0.5rem;
+          font-style: italic;
+          color: var(--me-brown);
         }
       `}</style>
     </div>

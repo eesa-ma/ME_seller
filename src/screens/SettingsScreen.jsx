@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { motion } from 'framer-motion';
 import { 
   Settings, 
@@ -11,7 +12,7 @@ import {
   CheckCircle,
   Image as ImageIcon
 } from 'lucide-react';
-import { getSellerSession, updateSellerProfile } from '../utils/storage';
+import { getSellerSession, updateSellerProfile, uploadShopLogo } from '../utils/auth';
 
 const SettingsScreen = () => {
   const [shopName, setShopName] = useState('');
@@ -21,6 +22,7 @@ const SettingsScreen = () => {
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [logo, setLogo] = useState('');
+  const [logoFile, setLogoFile] = useState(null); 
   const [locationUrl, setLocationUrl] = useState('');
   
   // Banking payout mock settings
@@ -29,63 +31,89 @@ const SettingsScreen = () => {
   const [ifsc, setIfsc] = useState('');
 
   const [saved, setSaved] = useState(false);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
   useEffect(() => {
-    const seller = getSellerSession();
-    if (seller) {
-      setShopName(seller.shopName || '');
-      setOwnerName(seller.ownerName || '');
-      setEmail(seller.email || '');
-      setPhone(seller.phone || '9876543210');
-      setCategory(seller.category || 'Wellness');
-      setDescription(seller.description || 'Verified seller partner of the Mind Empowered Community.');
-      setLogo(seller.logo || '');
-      setLocationUrl(seller.locationUrl || '');
-      setBankName(seller.bankName || 'State Bank of India');
-      setAccountNumber(seller.accountNumber || '•••• •••• •••• 9821');
-      setIfsc(seller.ifsc || 'SBIN0008432');
-    }
+    const fetchSession = async () => {
+      try {
+        const seller = await getSellerSession();
+        if (seller) {
+          setShopName(seller.shopName || '');
+          setOwnerName(seller.ownerName || '');
+          setEmail(seller.email || '');
+          setPhone(seller.phone || '');
+          setCategory(seller.category || 'Select Category');
+          setDescription(seller.description || '');
+          setLogo(seller.logo || '');
+          setLocationUrl(seller.locationUrl || '');
+          setBankName(seller.bankName || '');
+          setAccountNumber(seller.accountNumber || '');
+          setIfsc(seller.ifsc || '');
+        }
+      } catch (err) {
+        console.error("Settings session error:", err);
+      } finally {
+        setIsLoadingSettings(false);
+      }
+    };
+    fetchSession();
   }, []);
 
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1024 * 1024) { // 1MB limit to avoid localStorage size constraints
-        alert('Please choose a logo file under 1MB to ensure saving works smoothly.');
+      if (file.size > 5 * 1024 * 1024) { 
+        alert('Please choose a logo file under 5MB.');
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogo(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setLogoFile(file);
+      // Create a local preview
+      const previewUrl = URL.createObjectURL(file);
+      setLogo(previewUrl);
     }
   };
 
-  const handleSubmit = (e) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSaved(false);
+    setIsSaving(true);
 
-    const payload = {
-      shopName,
-      ownerName,
-      phone,
-      category,
-      description,
-      logo,
-      locationUrl,
-      bankName,
-      accountNumber,
-      ifsc
-    };
+    try {
+      let finalLogoUrl = logo;
 
-    const updated = updateSellerProfile(payload);
-    if (updated) {
+      // If a new file was selected, upload it
+      if (logoFile) {
+        finalLogoUrl = await uploadShopLogo(logoFile);
+        setLogo(finalLogoUrl); // Update the preview to the actual URL
+        setLogoFile(null);     // Reset file since it's uploaded
+      }
+
+      const payload = {
+        shopName,
+        ownerName,
+        phone,
+        category,
+        description,
+        logo: finalLogoUrl,
+        locationUrl,
+        bankName,
+        accountNumber,
+        ifsc
+      };
+
+      await updateSellerProfile(payload);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       
       // Emit a custom window event so the sidebar component knows it has to refresh session
       window.dispatchEvent(new Event('storage'));
+    } catch (err) {
+      console.error("Error updating profile", err);
+      alert("Failed to save settings.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -109,9 +137,14 @@ const SettingsScreen = () => {
         </motion.div>
       )}
 
-      <form onSubmit={handleSubmit} className="settings-form-layout">
-        {/* Profile Card */}
+      {isLoadingSettings ? (
         <div className="card settings-card">
+          <SkeletonLoader type="settings-form" />
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="settings-form-layout">
+          {/* Profile Card */}
+          <div className="card settings-card">
           <div className="settings-card-header">
             <Store size={20} className="header-icon" />
             <h3>Shop Profile & Description</h3>
@@ -166,6 +199,7 @@ const SettingsScreen = () => {
               rows="3" 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              placeholder='Your shop description'
             ></textarea>
           </div>
 
@@ -186,7 +220,7 @@ const SettingsScreen = () => {
                 {logo && (
                   <button 
                     type="button" 
-                    onClick={() => setLogo('')} 
+                    onClick={() => { setLogo(''); setLogoFile(null); }} 
                     className="btn btn-danger btn-sm remove-logo-btn"
                   >
                     Clear Logo
@@ -229,7 +263,8 @@ const SettingsScreen = () => {
               <input 
                 type="text" 
                 id="owner-name" 
-                className="form-input" 
+                className="form-input"
+                placeholder='Owner full name' 
                 value={ownerName} 
                 onChange={(e) => setOwnerName(e.target.value)}
                 required
@@ -242,6 +277,7 @@ const SettingsScreen = () => {
                 type="tel" 
                 id="owner-phone" 
                 className="form-input" 
+                placeholder='Contact number' 
                 value={phone} 
                 onChange={(e) => setPhone(e.target.value)}
                 required
@@ -301,12 +337,13 @@ const SettingsScreen = () => {
         </div>
 
         <div className="settings-actions-footer">
-          <button type="submit" className="btn btn-primary btn-save">
+          <button type="submit" className="btn btn-primary btn-save" disabled={isSaving}>
             <Save size={18} />
-            <span>Save Shop Changes</span>
+            <span>{isSaving ? 'Saving...' : 'Save Shop Changes'}</span>
           </button>
         </div>
       </form>
+      )}
 
       <style>{`
         .settings-screen {

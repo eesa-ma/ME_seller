@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -10,31 +11,71 @@ import {
   TrendingUp,
   PackageCheck
 } from 'lucide-react';
-import { getProducts, getOrders, getAnalyticsStats } from '../utils/storage';
+import { getAnalyticsStats } from '../utils/storage';
+import { getOrders } from '../utils/order';
+import { getSellerSession } from '../utils/auth';
+import { getProducts } from '../utils/product';
 
 const DashboardHome = () => {
   const navigate = useNavigate();
+  const [seller, setSeller] = useState(null);
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStockItems, setLowStockItems] = useState([]);
 
   useEffect(() => {
-    // Fetch dashboard statistics
-    const metrics = getAnalyticsStats();
-    setStats(metrics);
+    const fetchData = async () => {
+      // Fetch seller session
+      const session = await getSellerSession();
+      setSeller(session);
 
-    // Fetch and sort recent orders (last 5)
-    const allOrders = getOrders();
-    const sorted = [...allOrders].sort((a, b) => new Date(b.date) - new Date(a.date));
-    setRecentOrders(sorted.slice(0, 5));
+      // Fetch products
+      const allProducts = await getProducts();
+      
+      // Fetch and sort recent orders (last 5)
+      const allOrders = await getOrders();
+      const sorted = [...allOrders].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setRecentOrders(sorted.slice(0, 5));
 
-    // Fetch low stock items
-    const allProducts = getProducts();
-    const lowStock = allProducts.filter(p => p.stock <= 5);
-    setLowStockItems(lowStock);
+      // Fetch dashboard statistics using both products and orders
+      const metrics = getAnalyticsStats(allProducts, allOrders);
+      setStats(metrics);
+
+      // Fetch low stock items
+      const lowStock = allProducts.filter(p => p.stock <= 5);
+      setLowStockItems(lowStock);
+    };
+
+    fetchData();
   }, []);
 
-  if (!stats) return <div className="loading-placeholder">Loading statistics...</div>;
+  if (!stats) {
+    return (
+      <div className="dashboard-home">    
+        <div className="dashboard-welcome-banner">
+          <div>
+            <div className="skeleton skeleton-title" style={{ width: '300px', height: '32px' }}></div>
+            <div className="skeleton skeleton-text" style={{ width: '200px' }}></div>
+          </div>
+        </div>
+
+        <div className="stats-grid">
+          <SkeletonLoader type="card" count={4} />
+        </div>
+
+        <div className="dashboard-widgets-row">
+          <div className="widget-card orders-widget">
+             <div className="skeleton skeleton-title" style={{ width: '150px' }}></div>
+             <SkeletonLoader type="table-row" count={3} />
+          </div>
+          <div className="widget-card inventory-widget">
+             <div className="skeleton skeleton-title" style={{ width: '150px' }}></div>
+             <SkeletonLoader type="card" count={1} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -50,10 +91,10 @@ const DashboardHome = () => {
   };
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-home">    
       <div className="dashboard-welcome-banner">
         <div>
-          <h2>Welcome back to Mind Empowered Hub</h2>
+          <h2>Welcome back to {seller ? seller.shopName : 'Your Marketplace'}</h2>
           <p>Here is your shop's performance overview for today.</p>
         </div>
         <div className="banner-date">
@@ -247,22 +288,22 @@ const DashboardHome = () => {
               ) : (
                 recentOrders.map(order => (
                   <tr key={order.id}>
-                    <td className="order-id">{order.id}</td>
+                    <td className="order-id">{order.id.split('-')[0]}...</td>
                     <td>
                       <div className="customer-cell">
-                        <span className="customer-name">{order.customerName}</span>
-                        <span className="customer-email">{order.customerEmail}</span>
+                        <span className="customer-name">{order.customer_name}</span>
+                        <span className="customer-email">{order.customer_email || order.customer_phone}</span>
                       </div>
                     </td>
-                    <td>{new Date(order.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                    <td>{order.items.reduce((sum, item) => sum + item.quantity, 0)} items</td>
-                    <td className="order-amount">₹{order.totalAmount.toLocaleString('en-IN')}</td>
+                    <td>{new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td>{order.items ? order.items.reduce((sum, item) => sum + item.quantity, 0) : 0} items</td>
+                    <td className="order-amount">₹{parseFloat(order.total_amount || 0).toLocaleString('en-IN')}</td>
                     <td>
                       <span className={`badge ${
-                        order.fulfillmentStatus === 'Delivered' ? 'badge-success' :
-                        order.fulfillmentStatus === 'Shipped' ? 'badge-info' : 'badge-warning'
+                        order.fulfillment_status === 'Delivered' ? 'badge-success' :
+                        order.fulfillment_status === 'Shipped' ? 'badge-info' : 'badge-warning'
                       }`}>
-                        {order.fulfillmentStatus}
+                        {order.fulfillment_status}
                       </span>
                     </td>
                     <td>

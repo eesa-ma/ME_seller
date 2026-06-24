@@ -8,31 +8,43 @@ import InventoryScreen from './screens/InventoryScreen';
 import OrdersScreen from './screens/OrdersScreen';
 import AnalyticsScreen from './screens/AnalyticsScreen';
 import SettingsScreen from './screens/SettingsScreen';
-import { initStorage, getSellerSession } from './utils/storage';
+import { initStorage } from './utils/storage';
+import { getSellerSession } from './utils/auth';
+import { supabase } from './utils/supabaseClient';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize dummy DB values in localStorage
+    // Initialize dummy DB values in localStorage (orders mock data)
     initStorage();
     
-    // Check if seller is logged in
-    const checkSession = () => {
-      const session = getSellerSession();
-      setIsLoggedIn(!!session);
+    const checkSession = async () => {
+      try {
+        const session = await getSellerSession();
+        setIsLoggedIn(!!session);
+      } catch (err) {
+        console.error("Session check failed", err);
+        setIsLoggedIn(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
     checkSession();
     
-    // Listen to changes in seller session
-    window.addEventListener('storage', checkSession);
+    // Listen to changes in auth state (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
     return () => {
-      window.removeEventListener('storage', checkSession);
+      subscription.unsubscribe();
     };
   }, []);
 
-  const handleLoginSuccess = () => {
+    const handleLoginSuccess = () => {
     setIsLoggedIn(true);
   };
 

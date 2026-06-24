@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Sidebar';
-import { getSellerSession } from '../utils/storage';
+import { getSellerSession } from '../utils/auth';
 import { Bell, ShoppingBag, ShieldCheck } from 'lucide-react';
 
 const DashboardLayout = ({ children, onLogout }) => {
@@ -30,12 +30,20 @@ const DashboardLayout = ({ children, onLogout }) => {
   };
 
   useEffect(() => {
-    const session = getSellerSession();
-    if (!session) {
-      navigate('/auth');
-    } else {
-      setSeller(session);
-    }
+    const fetchSession = async () => {
+      try {
+        const session = await getSellerSession();
+        if (!session) {
+          navigate('/auth');
+        } else {
+          setSeller(session);
+        }
+      } catch (err) {
+        console.error("Dashboard session error:", err);
+        navigate('/auth');
+      }
+    };
+    fetchSession();
   }, [navigate]);
 
   if (!seller) {
