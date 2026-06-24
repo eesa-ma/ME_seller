@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -47,7 +48,33 @@ const DashboardHome = () => {
     fetchData();
   }, []);
 
-  if (!stats) return <div className="loading-placeholder">Loading statistics...</div>;
+  if (!stats) {
+    return (
+      <div className="dashboard-home">    
+        <div className="dashboard-welcome-banner">
+          <div>
+            <div className="skeleton skeleton-title" style={{ width: '300px', height: '32px' }}></div>
+            <div className="skeleton skeleton-text" style={{ width: '200px' }}></div>
+          </div>
+        </div>
+
+        <div className="stats-grid">
+          <SkeletonLoader type="card" count={4} />
+        </div>
+
+        <div className="dashboard-widgets-row">
+          <div className="widget-card orders-widget">
+             <div className="skeleton skeleton-title" style={{ width: '150px' }}></div>
+             <SkeletonLoader type="table-row" count={3} />
+          </div>
+          <div className="widget-card inventory-widget">
+             <div className="skeleton skeleton-title" style={{ width: '150px' }}></div>
+             <SkeletonLoader type="card" count={1} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },

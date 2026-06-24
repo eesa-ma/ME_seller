@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
@@ -20,6 +21,7 @@ const CATEGORIES = ['Wellness', 'Accessories', 'Stationery', 'Apparel', 'Crafts'
 
 const InventoryScreen = () => {
   const [products, setProducts] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [stockFilter, setStockFilter] = useState('All');
@@ -42,8 +44,10 @@ const InventoryScreen = () => {
   }, []);
 
   const loadProducts = async () => {
+    setIsLoadingProducts(true);
     const data = await getProducts();
     setProducts(data);
+    setIsLoadingProducts(false);
   };
 
   const handleOpenAddModal = () => {
@@ -229,7 +233,9 @@ const InventoryScreen = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.length === 0 ? (
+              {isLoadingProducts ? (
+                <SkeletonLoader type="table-row" count={5} />
+              ) : filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="empty-catalog-row">
                     <Package size={48} className="empty-icon" />

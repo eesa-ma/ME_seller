@@ -17,7 +17,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize dummy DB values in localStorage (for products/orders mock data)
+    // Initialize dummy DB values in localStorage (orders mock data)
     initStorage();
     
     const checkSession = async () => {
@@ -44,15 +44,7 @@ function App() {
     };
   }, []);
 
-  if (loading) {
-    return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAF6F1', color: '#461711', fontFamily: 'sans-serif' }}>
-        Loading ME Seller Dashboard...
-      </div>
-    );
-  }
-
-  const handleLoginSuccess = () => {
+    const handleLoginSuccess = () => {
     setIsLoggedIn(true);
   };
 

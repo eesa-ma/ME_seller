@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { motion } from 'framer-motion';
 import { 
   Settings, 
@@ -30,6 +31,7 @@ const SettingsScreen = () => {
   const [ifsc, setIfsc] = useState('');
 
   const [saved, setSaved] = useState(false);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -50,6 +52,8 @@ const SettingsScreen = () => {
         }
       } catch (err) {
         console.error("Settings session error:", err);
+      } finally {
+        setIsLoadingSettings(false);
       }
     };
     fetchSession();
@@ -133,9 +137,14 @@ const SettingsScreen = () => {
         </motion.div>
       )}
 
-      <form onSubmit={handleSubmit} className="settings-form-layout">
-        {/* Profile Card */}
+      {isLoadingSettings ? (
         <div className="card settings-card">
+          <SkeletonLoader type="settings-form" />
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="settings-form-layout">
+          {/* Profile Card */}
+          <div className="card settings-card">
           <div className="settings-card-header">
             <Store size={20} className="header-icon" />
             <h3>Shop Profile & Description</h3>
@@ -331,6 +340,7 @@ const SettingsScreen = () => {
           </button>
         </div>
       </form>
+      )}
 
       <style>{`
         .settings-screen {
