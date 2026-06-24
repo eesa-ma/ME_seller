@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  X, 
-  Package, 
-  Layers, 
-  Eye, 
-  EyeOff, 
+import {
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
+  X,
+  Package,
+  Layers,
+  Eye,
+  EyeOff,
   ArrowUpDown,
   TrendingUp,
   Image as ImageIcon
@@ -100,7 +100,11 @@ const InventoryScreen = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !price || stock === '') return;
+
+    if (!name.trim() || price === '' || price === null || stock === '' || stock === null) {
+      alert("Please fill out all required fields (Name, Price, and Stock).");
+      return;
+    }
 
     if (images.length + imageFiles.length === 0) {
       alert('A product listing requires at least 1 image.');
@@ -146,11 +150,11 @@ const InventoryScreen = () => {
 
   // Filtering Logic
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
-                          p.description.toLowerCase().includes(search.toLowerCase());
-    
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.description.toLowerCase().includes(search.toLowerCase());
+
     const matchesCategory = categoryFilter === 'All' || p.category === categoryFilter;
-    
+
     let matchesStock = true;
     if (stockFilter === 'OutOfStock') matchesStock = p.stock === 0;
     else if (stockFilter === 'LowStock') matchesStock = p.stock > 0 && p.stock <= 5;
@@ -177,9 +181,9 @@ const InventoryScreen = () => {
         <div className="filters-grid">
           <div className="search-box">
             <Search size={18} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search product name or keywords..." 
+            <input
+              type="text"
+              placeholder="Search product name or keywords..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -237,9 +241,9 @@ const InventoryScreen = () => {
                   <tr key={prod.id}>
                     <td>
                       <div className="product-info-cell">
-                        <img 
-                          src={(prod.images && prod.images[0]) || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400'} 
-                          alt={prod.name} 
+                        <img
+                          src= {prod.images && prod.images[0]}
+                          alt= {prod.name}
                           className="product-thumbnail"
                         />
                         <div className="product-info-text">
@@ -254,10 +258,9 @@ const InventoryScreen = () => {
                     <td className="product-price">₹{prod.price.toLocaleString('en-IN')}</td>
                     <td>
                       <div className="stock-level-cell">
-                        <span className={`badge ${
-                          prod.stock === 0 ? 'badge-danger' : 
-                          prod.stock <= 5 ? 'badge-warning' : 'badge-success'
-                        }`}>
+                        <span className={`badge ${prod.stock === 0 ? 'badge-danger' :
+                            prod.stock <= 5 ? 'badge-warning' : 'badge-success'
+                          }`}>
                           {prod.stock === 0 ? 'Out of Stock' : `${prod.stock} units`}
                         </span>
                       </div>
@@ -270,21 +273,21 @@ const InventoryScreen = () => {
                     </td>
                     <td>
                       <span className={`badge ${prod.status === 'active' ? 'badge-success' : 'badge-warning'}`}>
-                        {prod.status === 'active' ? <Eye size={12} style={{marginRight: '4px'}} /> : <EyeOff size={12} style={{marginRight: '4px'}} />}
+                        {prod.status === 'active' ? <Eye size={12} style={{ marginRight: '4px' }} /> : <EyeOff size={12} style={{ marginRight: '4px' }} />}
                         {prod.status}
                       </span>
                     </td>
                     <td>
                       <div className="actions-cell">
-                        <button 
-                          onClick={() => handleOpenEditModal(prod)} 
+                        <button
+                          onClick={() => handleOpenEditModal(prod)}
                           className="action-btn edit-btn"
                           title="Edit Listing"
                         >
                           <Edit2 size={16} />
                         </button>
-                        <button 
-                          onClick={() => handleDelete(prod.id)} 
+                        <button
+                          onClick={() => handleDelete(prod.id)}
                           className="action-btn delete-btn"
                           title="Delete Listing"
                         >
@@ -304,7 +307,7 @@ const InventoryScreen = () => {
       <AnimatePresence>
         {isModalOpen && (
           <div className="modal-overlay">
-            <motion.div 
+            <motion.div
               className="modal-card"
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -321,23 +324,23 @@ const InventoryScreen = () => {
               <form onSubmit={handleSubmit} className="modal-form">
                 <div className="form-group">
                   <label htmlFor="prod-name">Product Name *</label>
-                  <input 
-                    type="text" 
-                    id="prod-name" 
-                    className="form-input" 
-                    placeholder="e.g. Lavender Herbal Soap" 
+                  <input
+                    type="text"
+                    id="prod-name"
+                    className="form-input"
+                    placeholder="e.g. Lavender Herbal Soap"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    required 
+                    required
                   />
                 </div>
 
                 <div className="form-double-column">
                   <div className="form-group">
                     <label htmlFor="prod-category">Category *</label>
-                    <select 
-                      id="prod-category" 
-                      className="form-input" 
+                    <select
+                      id="prod-category"
+                      className="form-input"
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                     >
@@ -349,9 +352,9 @@ const InventoryScreen = () => {
 
                   <div className="form-group">
                     <label htmlFor="prod-status">Visibility Status</label>
-                    <select 
-                      id="prod-status" 
-                      className="form-input" 
+                    <select
+                      id="prod-status"
+                      className="form-input"
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
                     >
@@ -364,40 +367,40 @@ const InventoryScreen = () => {
                 <div className="form-double-column">
                   <div className="form-group">
                     <label htmlFor="prod-price">Retail Price (₹) *</label>
-                    <input 
-                      type="number" 
-                      id="prod-price" 
-                      className="form-input" 
-                      placeholder="e.g. 350" 
+                    <input
+                      type="number"
+                      id="prod-price"
+                      className="form-input"
+                      placeholder="e.g. 350"
                       min="0"
                       step="0.01"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
 
                   <div className="form-group">
                     <label htmlFor="prod-stock">Stock Quantity *</label>
-                    <input 
-                      type="number" 
-                      id="prod-stock" 
-                      className="form-input" 
-                      placeholder="e.g. 20" 
+                    <input
+                      type="number"
+                      id="prod-stock"
+                      className="form-input"
+                      placeholder="e.g. 20"
                       min="0"
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="prod-desc">Product Description</label>
-                  <textarea 
-                    id="prod-desc" 
-                    className="form-input text-area-input" 
-                    placeholder="Describe materials, sizing, fragrance details, and how it is made..." 
+                  <textarea
+                    id="prod-desc"
+                    className="form-input text-area-input"
+                    placeholder="Describe materials, sizing, fragrance details, and how it is made..."
                     rows="3"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -406,7 +409,7 @@ const InventoryScreen = () => {
 
                 <div className="form-group">
                   <label>Product Images * <span className="label-subtitle">(Up to 5 images allowed)</span></label>
-                  
+
                   {/* Show existing images */}
                   {images.length > 0 && (
                     <div className="existing-images-preview" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '15px' }}>
@@ -434,8 +437,8 @@ const InventoryScreen = () => {
                   <div className="image-urls-list">
                     {images.length + imageFiles.length < 5 && (
                       <div className="image-input-row">
-                        <input 
-                          type="file" 
+                        <input
+                          type="file"
                           accept="image/*"
                           multiple
                           onChange={handleFileChange}
@@ -447,9 +450,9 @@ const InventoryScreen = () => {
                 </div>
 
                 <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)} 
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
                     className="btn btn-secondary"
                   >
                     Cancel
