@@ -43,12 +43,12 @@ const SettingsScreen = () => {
           setEmail(seller.email || '');
           setPhone(seller.phone || '');
           setCategory(seller.category || 'Select Category');
-          setDescription(seller.description || 'Describe your shop...');
+          setDescription(seller.description || '');
           setLogo(seller.logo || '');
-          setLocationUrl(seller.locationUrl || 'Enter Google Maps Link');
-          setBankName(seller.bankName || 'Bank Name');
-          setAccountNumber(seller.accountNumber || 'Account Number');
-          setIfsc(seller.ifsc || 'IFSC');
+          setLocationUrl(seller.locationUrl || '');
+          setBankName(seller.bankName || '');
+          setAccountNumber(seller.accountNumber || '');
+          setIfsc(seller.ifsc || '');
         }
       } catch (err) {
         console.error("Settings session error:", err);
@@ -199,6 +199,7 @@ const SettingsScreen = () => {
               rows="3" 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              placeholder='Your shop description'
             ></textarea>
           </div>
 
@@ -262,7 +263,8 @@ const SettingsScreen = () => {
               <input 
                 type="text" 
                 id="owner-name" 
-                className="form-input" 
+                className="form-input"
+                placeholder='Owner full name' 
                 value={ownerName} 
                 onChange={(e) => setOwnerName(e.target.value)}
                 required
@@ -275,6 +277,7 @@ const SettingsScreen = () => {
                 type="tel" 
                 id="owner-phone" 
                 className="form-input" 
+                placeholder='Contact number' 
                 value={phone} 
                 onChange={(e) => setPhone(e.target.value)}
                 required
