@@ -11,12 +11,14 @@ import {
   TrendingUp,
   PackageCheck,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Check,
+  X
 } from 'lucide-react';
 import { getAnalyticsStats } from '../utils/storage';
 import { getOrders } from '../utils/order';
 import { getSellerSession } from '../utils/auth';
-import { getProducts } from '../utils/product';
+import { getProducts, updateProductStock } from '../utils/product';
 
 const DashboardHome = () => {
   const navigate = useNavigate();
@@ -26,6 +28,29 @@ const DashboardHome = () => {
   const [lowStockItems, setLowStockItems] = useState([]);
   const [stockPage, setStockPage] = useState(0);
   const stockPerPage = 3;
+  const [editingStockId, setEditingStockId] = useState(null);
+  const [editingStockValue, setEditingStockValue] = useState('');
+  const [savingStock, setSavingStock] = useState(false);
+
+  const handleStockSave = async (productId) => {
+    const newStock = parseInt(editingStockValue, 10);
+    if (isNaN(newStock) || newStock < 0) return;
+    setSavingStock(true);
+    try {
+      await updateProductStock(productId, newStock);
+      // Update local state
+      if (newStock > 5) {
+        setLowStockItems(prev => prev.filter(p => p.id !== productId));
+      } else {
+        setLowStockItems(prev => prev.map(p => p.id === productId ? { ...p, stock: newStock } : p));
+      }
+      setEditingStockId(null);
+    } catch (err) {
+      console.error('Failed to update stock:', err);
+    } finally {
+      setSavingStock(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -244,12 +269,44 @@ const DashboardHome = () => {
                       <span className={`badge ${item.stock === 0 ? 'badge-danger' : 'badge-warning'}`}>
                         {item.stock === 0 ? 'Out of Stock' : `${item.stock} left`}
                       </span>
-                      <button 
-                        onClick={() => navigate('/products')} 
-                        className="restock-action-btn"
-                      >
-                        Update
-                      </button>
+                      {editingStockId === item.id ? (
+                        <div className="inline-stock-edit">
+                          <input
+                            type="number"
+                            min="0"
+                            value={editingStockValue}
+                            onChange={(e) => setEditingStockValue(e.target.value)}
+                            className="stock-edit-input"
+                            autoFocus
+                            onKeyDown={(e) => e.key === 'Enter' && handleStockSave(item.id)}
+                          />
+                          <button
+                            onClick={() => handleStockSave(item.id)}
+                            disabled={savingStock}
+                            className="stock-save-btn"
+                            title="Save"
+                          >
+                            <Check size={14} />
+                          </button>
+                          <button
+                            onClick={() => setEditingStockId(null)}
+                            className="stock-cancel-btn"
+                            title="Cancel"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => {
+                            setEditingStockId(item.id);
+                            setEditingStockValue(item.stock.toString());
+                          }} 
+                          className="restock-action-btn"
+                        >
+                          Update
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -671,6 +728,67 @@ const DashboardHome = () => {
 
         .restock-action-btn:hover {
           color: var(--accent);
+        }
+
+        .inline-stock-edit {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+
+        .stock-edit-input {
+          width: 60px;
+          padding: 0.3rem 0.5rem;
+          font-size: 0.8rem;
+          border: 1px solid var(--accent);
+          border-radius: 6px;
+          background: var(--bg-secondary);
+          color: var(--text-primary);
+          text-align: center;
+          outline: none;
+        }
+
+        .stock-edit-input:focus {
+          box-shadow: 0 0 0 2px rgba(255, 118, 18, 0.2);
+        }
+
+        .stock-save-btn {
+          width: 26px;
+          height: 26px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--success);
+          color: white;
+          transition: var(--transition);
+        }
+
+        .stock-save-btn:hover:not(:disabled) {
+          opacity: 0.85;
+        }
+
+        .stock-save-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .stock-cancel-btn {
+          width: 26px;
+          height: 26px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--bg-primary);
+          color: var(--text-secondary);
+          border: 1px solid var(--border);
+          transition: var(--transition);
+        }
+
+        .stock-cancel-btn:hover {
+          color: var(--danger);
+          border-color: var(--danger);
         }
 
         .recent-orders-card .card-header {
