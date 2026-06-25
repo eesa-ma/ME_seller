@@ -1,7 +1,3 @@
-// remove this
-export const initStorage = () => {
-};
-
 // Analytics helper, calculate stats based on Supabase data
 export const getAnalyticsStats = (products = [], orders = [], productViews = []) => {
   const validEarningsOrders = orders
@@ -61,19 +57,28 @@ export const getAnalyticsStats = (products = [], orders = [], productViews = [])
     itemsSoldTrend = 100;
   }
 
-  // Generate some monthly earnings data for chart
-  const monthlyRevenue = [
-    { name: 'Jan', revenue: 4000 },
-    { name: 'Feb', revenue: 5000 },
-    { name: 'Mar', revenue: 8000 },
-    { name: 'Apr', revenue: 7500 },
-    { name: 'May', revenue: 11000 },
-    { name: 'Jun', revenue: totalEarnings + 8000 } // current month plus previous mock base
-  ];
+  // Calculate dynamic monthly revenue for the last 6 months
+  const monthlyRevenue = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthName = d.toLocaleString('en-US', { month: 'short' });
+
+    const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    const revenueForMonth = validEarningsOrders
+      .filter(o => {
+        const orderDate = new Date(o.created_at);
+        return orderDate >= startOfMonth && orderDate <= endOfMonth;
+      })
+      .reduce((sum, o) => sum + parseFloat(o.total_amount || 0), 0);
+
+    monthlyRevenue.push({ name: monthName, revenue: revenueForMonth });
+  }
 
   // Calculate conversion rate trend using the new historical views table
   const viewsThisMonth = productViews.filter(v => new Date(v.created_at) >= currentMonthStart).length;
-  
+
   const viewsLastMonth = productViews.filter(v => {
     const d = new Date(v.created_at);
     return d >= lastMonthStart && d <= lastMonthEnd;
@@ -109,7 +114,6 @@ export const getAnalyticsStats = (products = [], orders = [], productViews = [])
     pendingOrders,
     outOfStockItems,
     monthlyRevenue,
-    activeListingsCount: products.filter(p => p.status === 'active').length, //check this
     totalViews,
     conversionRate,
     earningsTrend,
