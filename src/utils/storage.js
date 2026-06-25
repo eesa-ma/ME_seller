@@ -1,17 +1,8 @@
-// Storage Utility for ME Seller Dashboard
-
-const SELLER_KEY = 'me_seller_session';
-const PRODUCTS_KEY = 'me_seller_products';
-const ORDERS_KEY = 'me_seller_orders';
-
-// Initialization check for other things if needed (like session, products fallback etc)
+// remove this
 export const initStorage = () => {
-  // Keeping this just in case other parts rely on it being present,
-  // but products and orders are now handled via Supabase.
 };
 
-// Analytics helper
-// Now accepts orders and products directly, so it can calculate stats based on Supabase data
+// Analytics helper, calculate stats based on Supabase data
 export const getAnalyticsStats = (products = [], orders = []) => {
   const totalEarnings = orders
     .filter(o => o.fulfillment_status === 'Delivered' || o.fulfillment_status === 'Shipped')
@@ -19,7 +10,9 @@ export const getAnalyticsStats = (products = [], orders = []) => {
 
   const pendingOrders = orders.filter(o => o.fulfillment_status === 'Processing').length;
   const outOfStockItems = products.filter(p => p.stock === 0).length;
-  const totalItemsSold = products.reduce((sum, p) => sum + (p.salesCount || 0), 0);
+  const totalItemsSold = orders
+    .filter(o => o.fulfillment_status === 'Delivered')
+    .reduce((sum, o) => sum + (o.items ? o.items.reduce((itemSum, item) => itemSum + (item.quantity || 1), 0) : 0), 0);
 
   // Generate some monthly earnings data for chart
   const monthlyRevenue = [
