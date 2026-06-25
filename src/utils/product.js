@@ -26,6 +26,26 @@ export const getProducts = async () => {
   }
 };
 
+// Fetch historical views for all products owned by the seller
+export const getProductViews = async (productIds = []) => {
+  try {
+    if (!productIds || productIds.length === 0) return [];
+
+    const { data, error } = await supabase
+      .schema('marketplace_dataspace')
+      .from('product_views')
+      .select('*')
+      .in('product_id', productIds);
+
+    if (error) throw error;
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching product views:", error);
+    return [];
+  }
+};
+
 // Upload a single product image to the 'product-images' bucket
 export const uploadProductImage = async (file) => {
   try {

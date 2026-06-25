@@ -11,7 +11,7 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { getOrders } from '../utils/order';
-import { getProducts } from '../utils/product';
+import { getProducts, getProductViews } from '../utils/product';
 import { getAnalyticsStats } from '../utils/storage';
 import SkeletonLoader from '../components/SkeletonLoader';
 const AnalyticsScreen = () => {
@@ -24,7 +24,10 @@ const AnalyticsScreen = () => {
       const allProducts = await getProducts();
       const allOrders = await getOrders();
       
-      const metrics = getAnalyticsStats(allProducts, allOrders);
+      const productIds = allProducts.map(p => p.id);
+      const productViews = await getProductViews(productIds);
+      
+      const metrics = getAnalyticsStats(allProducts, allOrders, productViews);
       setStats(metrics);
 
       // Calculate top-selling products (sorted by salesCount desc)
@@ -137,8 +140,9 @@ const AnalyticsScreen = () => {
           <div>
             <span>Conversion Rate</span>
             <h3>{stats.conversionRate}%</h3>
-            <p className="trend-label positive">
-              <TrendingUp size={12} /> +0.5% optimization increase
+            <p className={`trend-label ${stats.conversionTrend >= 0 ? 'positive' : 'negative'}`}>
+              {stats.conversionTrend >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+              {stats.conversionTrend > 0 ? '+' : ''}{stats.conversionTrend}% compared to last month
             </p>
           </div>
         </div>

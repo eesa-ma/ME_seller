@@ -3,7 +3,7 @@ export const initStorage = () => {
 };
 
 // Analytics helper, calculate stats based on Supabase data
-export const getAnalyticsStats = (products = [], orders = []) => {
+export const getAnalyticsStats = (products = [], orders = [], productViews = []) => {
   const validEarningsOrders = orders
     .filter(o => o.fulfillment_status === 'Delivered' || o.fulfillment_status === 'Shipped');
 
@@ -71,6 +71,32 @@ export const getAnalyticsStats = (products = [], orders = []) => {
     { name: 'Jun', revenue: totalEarnings + 8000 } // current month plus previous mock base
   ];
 
+  // Calculate conversion rate trend using the new historical views table
+  const viewsThisMonth = productViews.filter(v => new Date(v.created_at) >= currentMonthStart).length;
+  
+  const viewsLastMonth = productViews.filter(v => {
+    const d = new Date(v.created_at);
+    return d >= lastMonthStart && d <= lastMonthEnd;
+  }).length;
+
+  let conversionRateThisMonth = 0;
+  if (viewsThisMonth > 0) {
+    conversionRateThisMonth = (itemsSoldThisMonth / viewsThisMonth) * 100;
+  }
+
+  let conversionRateLastMonth = 0;
+  if (viewsLastMonth > 0) {
+    conversionRateLastMonth = (itemsSoldLastMonth / viewsLastMonth) * 100;
+  }
+
+  let conversionTrend = 0;
+  if (conversionRateLastMonth > 0) {
+    conversionTrend = parseFloat((((conversionRateThisMonth - conversionRateLastMonth) / conversionRateLastMonth) * 100).toFixed(1));
+  } else if (conversionRateThisMonth > 0) {
+    conversionTrend = 100;
+  }
+
+  // Use the all-time views for the top-level stats
   const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
   let conversionRate = 0;
   if (totalViews > 0) {
@@ -87,6 +113,7 @@ export const getAnalyticsStats = (products = [], orders = []) => {
     totalViews,
     conversionRate,
     earningsTrend,
-    itemsSoldTrend
+    itemsSoldTrend,
+    conversionTrend
   };
 };
