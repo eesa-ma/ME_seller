@@ -1,8 +1,3 @@
-// Storage Utility for ME Seller Dashboard
-
-const SELLER_KEY = 'me_seller_session';
-const PRODUCTS_KEY = 'me_seller_products';
-const ORDERS_KEY = 'me_seller_orders';
 
 // Initialization check for other things if needed (like session, products fallback etc)
 export const initStorage = () => {
@@ -19,7 +14,9 @@ export const getAnalyticsStats = (products = [], orders = []) => {
 
   const pendingOrders = orders.filter(o => o.fulfillment_status === 'Processing').length;
   const outOfStockItems = products.filter(p => p.stock === 0).length;
-  const totalItemsSold = products.reduce((sum, p) => sum + (p.salesCount || 0), 0);
+  const totalItemsSold = orders
+    .filter(o => o.fulfillment_status === 'Delivered')
+    .reduce((sum, o) => sum + (o.items ? o.items.reduce((itemSum, item) => itemSum + (item.quantity || 1), 0) : 0), 0);
 
   // Generate some monthly earnings data for chart
   const monthlyRevenue = [
