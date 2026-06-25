@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  ClipboardList, 
-  Search, 
-  MapPin, 
-  Mail, 
-  Calendar, 
-  ShoppingBag, 
+import {
+  ClipboardList,
+  Search,
+  MapPin,
+  Mail,
+  Calendar,
+  ShoppingBag,
   CheckCircle,
   Truck,
   Box,
@@ -41,7 +41,7 @@ const OrdersScreen = () => {
     setIsUpdatingStatus(true);
     try {
       await updateOrderStatus(orderId, nextStatus);
-      
+
       // Update local state to reflect change without refetching immediately
       setOrders(prevOrders => prevOrders.map(o => {
         if (o.id === orderId) {
@@ -62,9 +62,9 @@ const OrdersScreen = () => {
   // Filter orders by tab and search
   const filteredOrders = orders.filter(order => {
     const matchesTab = activeTab === 'All' || order.fulfillment_status === activeTab;
-    const matchesSearch = order.id.toLowerCase().includes(search.toLowerCase()) || 
-                          (order.customer_name || '').toLowerCase().includes(search.toLowerCase()) ||
-                          (order.customer_email || '').toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = order.id.toLowerCase().includes(search.toLowerCase()) ||
+      (order.customer_name || '').toLowerCase().includes(search.toLowerCase()) ||
+      (order.customer_email || '').toLowerCase().includes(search.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -90,7 +90,7 @@ const OrdersScreen = () => {
       <div className="orders-controls card">
         <div className="orders-tabs">
           {['All', 'Processing', 'Shipped', 'Delivered'].map(tab => (
-            <button 
+            <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`order-tab-btn ${activeTab === tab ? 'active' : ''}`}
@@ -102,9 +102,9 @@ const OrdersScreen = () => {
 
         <div className="orders-search">
           <Search size={18} className="search-icon" />
-          <input 
-            type="text" 
-            placeholder="Search by Order ID, buyer name or email..." 
+          <input
+            type="text"
+            placeholder="Search by Order ID, buyer name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -123,7 +123,7 @@ const OrdersScreen = () => {
         ) : (
           <div className="orders-grid">
             {filteredOrders.map(order => (
-              <motion.div 
+              <motion.div
                 key={order.id}
                 layout
                 initial={{ opacity: 0, y: 10 }}
@@ -134,15 +134,14 @@ const OrdersScreen = () => {
                   <div>
                     <span className="order-badge-id">{order.id.split('-')[0]}...</span>
                     <span className="order-date-label">
-                      <Calendar size={12} style={{marginRight: '4px'}} /> {new Date(order.created_at).toLocaleDateString()}
+                      <Calendar size={12} style={{ marginRight: '4px' }} /> {new Date(order.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <span className={`badge ${
-                    order.fulfillment_status === 'Delivered' ? 'badge-success' :
-                    order.fulfillment_status === 'Shipped' ? 'badge-info' : 'badge-warning'
-                  }`}>
+                  <span className={`badge ${order.fulfillment_status === 'Delivered' ? 'badge-success' :
+                      order.fulfillment_status === 'Shipped' ? 'badge-info' : 'badge-warning'
+                    }`}>
                     {getFulfillmentIcon(order.fulfillment_status)}
-                    <span style={{marginLeft: '4px'}}>{order.fulfillment_status}</span>
+                    <span style={{ marginLeft: '4px' }}>{order.fulfillment_status}</span>
                   </span>
                 </div>
 
@@ -168,8 +167,8 @@ const OrdersScreen = () => {
                 </div>
 
                 <div className="order-item-footer">
-                  <button 
-                    onClick={() => navigate('/orders/' + order.id)} 
+                  <button
+                    onClick={() => navigate('/orders/' + order.id)}
                     className="btn btn-secondary btn-sm"
                   >
                     View Details & Address
@@ -177,16 +176,16 @@ const OrdersScreen = () => {
 
                   <div className="fulfillment-actions">
                     {order.fulfillment_status === 'Processing' && (
-                      <button 
-                        onClick={() => navigate('/orders/' + order.id)} 
+                      <button
+                        onClick={() => navigate('/orders/' + order.id)}
                         className="btn btn-primary btn-sm btn-action-ship"
                       >
                         <Truck size={14} /> Ship Order
                       </button>
                     )}
                     {order.fulfillment_status === 'Shipped' && (
-                      <button 
-                        onClick={() => handleStatusChange(order.id, 'Delivered')} 
+                      <button
+                        onClick={() => handleStatusChange(order.id, 'Delivered')}
                         disabled={isUpdatingStatus}
                         className="btn btn-primary btn-sm btn-action-deliver"
                       >

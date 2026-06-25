@@ -308,7 +308,7 @@ const DashboardHome = () => {
                     </td>
                     <td>
                       <button 
-                        onClick={() => navigate('/orders')} 
+                        onClick={() => navigate('/orders/' + order.id)} 
                         className="btn-text-link"
                       >
                         Manage
