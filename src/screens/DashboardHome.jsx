@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   ArrowRight,
   TrendingUp,
+  TrendingDown,
   PackageCheck,
   ChevronLeft,
   ChevronRight,
@@ -206,8 +207,11 @@ const DashboardHome = () => {
               <h3>Monthly Performance</h3>
               <p>Combined store revenue trend</p>
             </div>
-            <span className="chart-badge">
-              <TrendingUp size={14} /> +12.5%
+            <span 
+              className="chart-badge"
+              style={stats.earningsTrend < 0 ? { background: 'var(--danger-soft)', color: 'var(--danger)' } : {}}
+            >
+              {stats.earningsTrend >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />} {stats.earningsTrend > 0 ? '+' : ''}{stats.earningsTrend}%
             </span>
           </div>
 
