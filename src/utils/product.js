@@ -26,6 +26,26 @@ export const getProducts = async () => {
   }
 };
 
+// Fetch historical views for all products owned by the seller
+export const getProductViews = async (productIds = []) => {
+  try {
+    if (!productIds || productIds.length === 0) return [];
+
+    const { data, error } = await supabase
+      .schema('marketplace_dataspace')
+      .from('product_views')
+      .select('*')
+      .in('product_id', productIds);
+
+    if (error) throw error;
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching product views:", error);
+    return [];
+  }
+};
+
 // Upload a single product image to the 'product-images' bucket
 export const uploadProductImage = async (file) => {
   try {
@@ -122,6 +142,29 @@ export const deleteProduct = async (id) => {
     return true;
   } catch (error) {
     console.error("Error deleting product:", error);
+    throw error;
+  }
+};
+
+// Quick-update only the stock for a product
+export const updateProductStock = async (productId, newStock) => {
+  try {
+    const session = await getSellerSession();
+    if (!session) throw new Error("No active seller session");
+
+    const { data, error } = await supabase
+      .schema('marketplace_dataspace')
+      .from('products')
+      .update({ stock: newStock })
+      .eq('id', productId)
+      .eq('seller_id', session.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error updating product stock:", error);
     throw error;
   }
 };

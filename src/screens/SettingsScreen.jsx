@@ -21,6 +21,7 @@ const SettingsScreen = () => {
   const [phone, setPhone] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [aboutSeller, setAboutSeller] = useState('');
   const [logo, setLogo] = useState('');
   const [logoFile, setLogoFile] = useState(null); 
   const [locationUrl, setLocationUrl] = useState('');
@@ -44,6 +45,7 @@ const SettingsScreen = () => {
           setPhone(seller.phone || '');
           setCategory(seller.category || 'Select Category');
           setDescription(seller.description || '');
+          setAboutSeller(seller.aboutSeller || '');
           setLogo(seller.logo || '');
           setLocationUrl(seller.locationUrl || '');
           setBankName(seller.bankName || '');
@@ -96,6 +98,7 @@ const SettingsScreen = () => {
         phone,
         category,
         description,
+        aboutSeller,
         logo: finalLogoUrl,
         locationUrl,
         bankName,
@@ -200,6 +203,18 @@ const SettingsScreen = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder='Your shop description'
+            ></textarea>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="about-seller">About the Seller</label>
+            <textarea 
+              id="about-seller" 
+              className="form-input textarea-field" 
+              rows="4" 
+              value={aboutSeller}
+              onChange={(e) => setAboutSeller(e.target.value)}
+              placeholder='Share a bit about yourself, your story, or your journey...'
             ></textarea>
           </div>
 

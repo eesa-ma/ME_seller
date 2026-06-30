@@ -33,7 +33,8 @@ export const getSellerSession = async () => {
         locationUrl: sellerData.location_url,
         bankName: sellerData.bank_name,
         accountNumber: sellerData.account_number,
-        ifsc: sellerData.ifsc
+        ifsc: sellerData.ifsc,
+        aboutSeller: sellerData.about
     };
 };
 
@@ -68,7 +69,8 @@ export const loginSeller = async (email, password) => {
         locationUrl: sellerData.location_url,
         bankName: sellerData.bank_name,
         accountNumber: sellerData.account_number,
-        ifsc: sellerData.ifsc
+        ifsc: sellerData.ifsc,
+        aboutSeller: sellerData.about
     };
 };
 
@@ -157,7 +159,8 @@ export const updateSellerProfile = async (updatedDetails) => {
             location_url: updatedDetails.locationUrl,
             bank_name: updatedDetails.bankName,
             account_number: updatedDetails.accountNumber,
-            ifsc: updatedDetails.ifsc
+            ifsc: updatedDetails.ifsc,
+            about: updatedDetails.aboutSeller
         })
         .eq('id', session.user.id);
 
