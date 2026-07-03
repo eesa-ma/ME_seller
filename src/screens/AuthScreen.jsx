@@ -26,9 +26,13 @@ const AuthScreen = ({ onLogin }) => {
 
     if (isLogin) {
       try {
-        await loginSeller(email, password); 
+        const session = await loginSeller(email, password); 
         if (onLogin) onLogin();
-        navigate('/');
+        if (session.is_admin) {
+          navigate('/admin/communities');
+        } else {
+          navigate('/');
+        }
       } catch (err) {
         console.error("Login Error:", err);
         setError(err.message || 'Login failed. Please check your credentials.');
@@ -40,9 +44,13 @@ const AuthScreen = ({ onLogin }) => {
       }
       
       try {
-        await registerSeller(email, password, { shopName, ownerName, category }); // await the Supabase call
+        const session = await registerSeller(email, password, { shopName, ownerName, category }); // await the Supabase call
         if (onLogin) onLogin();
-        navigate('/');
+        if (session.is_admin) {
+          navigate('/admin/communities');
+        } else {
+          navigate('/');
+        }
       } catch (err) {
         console.error("Registration Error:", err);
         setError(err.message || 'Registration failed.');
@@ -181,23 +189,10 @@ const AuthScreen = ({ onLogin }) => {
             )}
 
             <button type="submit" className="btn btn-primary auth-submit-btn">
-              {isLogin ? 'Sign In as Seller' : 'Complete Setup & Register'}
+              {isLogin ? 'Sign In' : 'Complete Setup & Register'}
             </button>
           </form>
 
-          {/* isLogin && (
-            <div className="demo-login-box">
-              <div className="demo-badge">Demo Account Available</div>
-              <p>Quick login to view mock store settings, products, and sales logs:</p>
-              <button 
-                type="button" 
-                onClick={handleQuickLogin}
-                className="btn btn-secondary quick-login-btn"
-              >
-                Use default credential
-              </button>
-            </div>
-          ) */}
         </div>
       </motion.div>
 

@@ -34,7 +34,8 @@ export const getSellerSession = async () => {
         bankName: sellerData.bank_name,
         accountNumber: sellerData.account_number,
         ifsc: sellerData.ifsc,
-        aboutSeller: sellerData.about
+        aboutSeller: sellerData.about,
+        is_admin: sellerData.is_admin || false
     };
 };
 
@@ -70,7 +71,8 @@ export const loginSeller = async (email, password) => {
         bankName: sellerData.bank_name,
         accountNumber: sellerData.account_number,
         ifsc: sellerData.ifsc,
-        aboutSeller: sellerData.about
+        aboutSeller: sellerData.about,
+        is_admin: sellerData.is_admin || false
     };
 };
 
@@ -105,7 +107,8 @@ export const registerSeller = async (email, password, shopDetails) => {
         shopName: shopDetails.shopName,
         ownerName: shopDetails.ownerName,
         category: shopDetails.category,
-        balance: 0.00
+        balance: 0.00,
+        is_admin: false
     };
 };
 

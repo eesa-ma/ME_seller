@@ -50,6 +50,8 @@ const DashboardLayout = ({ children, onLogout }) => {
         const session = await getSellerSession();
         if (!session) {
           navigate('/auth');
+        } else if (session.is_admin) {
+          navigate('/admin/communities');
         } else {
           setSeller(session);
         }
