@@ -10,6 +10,13 @@ import OrderDetailsScreen from './screens/OrderDetailsScreen';
 import TransactionsScreen from './screens/TransactionsScreen';
 import AnalyticsScreen from './screens/AnalyticsScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import AdminCommunitiesLayout from './components/AdminCommunitiesLayout';
+import CommunitiesScreen from './screens/CommunitiesScreen';
+import CommunityDetailsScreen from './screens/CommunityDetailsScreen';
+import AdminRevenueScreen from './screens/AdminRevenueScreen';
+import AdminPayoutsScreen from './screens/AdminPayoutsScreen';
+import AdminOrdersScreen from './screens/AdminOrdersScreen';
+import AdminSettingsScreen from './screens/AdminSettingsScreen';
 import { getSellerSession } from './utils/auth';
 import { supabase } from './utils/supabaseClient';
 
@@ -121,6 +128,58 @@ function App() {
               <DashboardLayout onLogout={handleLogoutSuccess}>
                 <SettingsScreen />
               </DashboardLayout>
+            } 
+          />
+
+          {/* Admin Communities Routes */}
+          <Route 
+            path="/admin/communities" 
+            element={
+              <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
+                <CommunitiesScreen />
+              </AdminCommunitiesLayout>
+            } 
+          />
+          <Route 
+            path="/admin/communities/revenue" 
+            element={
+              <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
+                <AdminRevenueScreen />
+              </AdminCommunitiesLayout>
+            } 
+          />
+          <Route 
+            path="/admin/communities/payouts" 
+            element={
+              <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
+                <AdminPayoutsScreen />
+              </AdminCommunitiesLayout>
+            } 
+          />
+          <Route 
+            path="/admin/communities/orders" 
+            element={
+              <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
+                <AdminOrdersScreen />
+              </AdminCommunitiesLayout>
+            } 
+          />
+          <Route 
+            path="/admin/communities/settings" 
+            element={
+              <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
+                <AdminSettingsScreen />
+              </AdminCommunitiesLayout>
+            } 
+          />
+
+          {/* Dynamic route must be AFTER specific nested routes */}
+          <Route 
+            path="/admin/communities/:communityId" 
+            element={
+              <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
+                <CommunityDetailsScreen />
+              </AdminCommunitiesLayout>
             } 
           />
 
