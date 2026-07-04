@@ -69,10 +69,9 @@ const AdminCommunitiesSidebar = ({ onLogout }) => {
           <div className="brand-logo">
             <div className="brand-icon" style={{
               width: '42px', height: '42px', borderRadius: '8px',
-              background: 'linear-gradient(135deg, var(--accent), #ff9a44)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
             }}>
-              <ShieldAlert size={24} />
+              <img src="/brand/logo.jpeg" alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
             </div>
             <div className="brand-title">
               <h3>Mind Empowered</h3>

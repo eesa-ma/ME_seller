@@ -228,10 +228,6 @@ const AdminCommunitiesLayout = ({ children, onLogout }) => {
                     <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{admin.email || 'admin@marketplace.com'}</span>
                   </p>
                   <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Role ID:</span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: '500', fontFamily: 'monospace' }}>{admin.id?.substring(0,8) || 'ADMIN_AUTH'}</span>
-                  </p>
-                  <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
                     <span>Access Level:</span>
                     <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>Global Management</span>
                   </p>
