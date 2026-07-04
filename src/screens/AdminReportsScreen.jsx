@@ -189,8 +189,8 @@ const AdminReportsScreen = () => {
                     <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{report.issue_type?.replace('_', ' ') || 'Other'}</div>
                   </td>
                   <td style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    <div>B: {report.buyer_id?.substring(0, 6)}...</div>
-                    <div>S: {report.seller_id?.substring(0, 6)}...</div>
+                    <div>B: {report.buyer_name || (report.buyer_id?.substring(0, 6) + '...')}</div>
+                    <div>S: {report.seller_name || (report.seller_id?.substring(0, 6) + '...')}</div>
                   </td>
                   <td style={{ padding: '1rem' }}>
                     <span className={`badge ${getStatusClass(report.status)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', textTransform: 'capitalize' }}>

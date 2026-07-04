@@ -134,21 +134,55 @@ export const processSellerPayout = async (sellerId) => {
 // Fetch all order reports
 export const getAdminReports = async () => {
   try {
-    const { data, error  } = await supabase
+    const { data: reports, error } = await supabase
       .schema('marketplace_dataspace')
       .from('order_reports')
       .select('*')
-      .order('created_at', { ascending: false  });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
-  
+    
+    if (!reports || reports.length === 0) return [];
+
+    // Dynamically link buyer and seller data
+    const enrichedReports = await Promise.all(reports.map(async (report) => {
+      let buyerName = 'Unknown Buyer';
+      let sellerName = 'Unknown Seller';
+      
+      // Fetch buyer details from orders table
+      if (report.order_id) {
+        const { data: orderData } = await supabase
+          .schema('marketplace_dataspace')
+          .from('orders')
+          .select('customer_name')
+          .eq('id', report.order_id)
+          .maybeSingle();
+        if (orderData?.customer_name) buyerName = orderData.customer_name;
+      }
+      
+      // Fetch seller details from sellers table
+      if (report.seller_id) {
+        const { data: sellerData } = await supabase
+          .schema('marketplace_dataspace')
+          .from('sellers')
+          .select('shop_name')
+          .eq('id', report.seller_id)
+          .maybeSingle();
+        if (sellerData?.shop_name) sellerName = sellerData.shop_name;
+      }
+      
+      return {
+        ...report,
+        buyer_name: buyerName,
+        seller_name: sellerName
+      };
+    }));
+
+    return enrichedReports;
   } catch (error) {
     console.error('Error fetching order reports:', error);
     return [];
-  
   }
-
 };
 
 // Fetch specific report details
