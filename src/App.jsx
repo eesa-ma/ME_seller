@@ -18,6 +18,8 @@ import AdminPayoutsScreen from './screens/AdminPayoutsScreen';
 import AdminOrdersScreen from './screens/AdminOrdersScreen';
 import AdminTransactionsScreen from './screens/AdminTransactionsScreen';
 import AdminSettingsScreen from './screens/AdminSettingsScreen';
+import AdminReportsScreen from './screens/AdminReportsScreen';
+import AdminReportDetailsScreen from './screens/AdminReportDetailsScreen';
 import { getSellerSession } from './utils/auth';
 import { supabase } from './utils/supabaseClient';
 
@@ -178,6 +180,22 @@ function App() {
             element={
               <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
                 <AdminSettingsScreen />
+              </AdminCommunitiesLayout>
+            } 
+          />
+          <Route 
+            path="/admin/reports" 
+            element={
+              <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
+                <AdminReportsScreen />
+              </AdminCommunitiesLayout>
+            } 
+          />
+          <Route 
+            path="/admin/reports/:reportId" 
+            element={
+              <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
+                <AdminReportDetailsScreen />
               </AdminCommunitiesLayout>
             } 
           />

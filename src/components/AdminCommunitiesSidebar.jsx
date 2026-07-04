@@ -32,6 +32,7 @@ const AdminCommunitiesSidebar = ({ onLogout }) => {
 
   const menuItems = [
     { name: 'All NGOs/Communities', path: '/admin/communities', icon: Building2 },
+    { name: 'Buyer Reports', path: '/admin/reports', icon: ClipboardList },
     { name: 'Admin Settings', path: '/admin/communities/settings', icon: Settings },
   ];
 
