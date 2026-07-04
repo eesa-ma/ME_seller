@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Activity, IndianRupee, TrendingUp, Percent, Store, BarChart3 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Activity, IndianRupee, TrendingUp, Percent, Store, BarChart3, ArrowLeft } from 'lucide-react';
 import { getAllOrders, getAllSellers, getAllProducts } from '../utils/admin';
 import SkeletonLoader from '../components/SkeletonLoader';
 
-const COMMISSION_RATE = 0.10; // 10% platform commission
+const COMMISSION_RATE = 0.05; // 5% platform commission
 
 // ─── Compute last-N-months monthly revenue from real orders ─────────────────
 const buildMonthlyRevenue = (orders, monthCount = 6) => {
@@ -32,6 +33,7 @@ const buildMonthlyRevenue = (orders, monthCount = 6) => {
 };
 
 const AdminRevenueScreen = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -107,6 +109,9 @@ const AdminRevenueScreen = () => {
     <div className="admin-revenue-screen">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="page-header">
+        <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')}>
+          <ArrowLeft size={18} /> Back
+        </button>
         <div className="page-header-icon"><BarChart3 size={22} /></div>
         <div>
           <h2 className="page-title">Revenue Analytics</h2>
@@ -133,7 +138,7 @@ const AdminRevenueScreen = () => {
                 color: 'accent',
               },
               {
-                label: 'Platform Commission (10%)',
+                label: 'Platform Commission (5%)',
                 value: `₹${totalCommission.toLocaleString('en-IN')}`,
                 sub: 'Flat rate on all transactions',
                 icon: <Percent size={22} />,
@@ -208,12 +213,12 @@ const AdminRevenueScreen = () => {
               {[
                 {
                   title: 'Standard Commission',
-                  desc: 'A flat 10% platform service fee is collected on all successfully fulfilled e-commerce orders.',
+                  desc: 'A flat 5% platform service fee is collected on all successfully fulfilled e-commerce orders.',
                   accent: 'var(--accent)',
                 },
                 {
                   title: 'Social Cause Exemption',
-                  desc: 'Verified NGO partners receive 90% direct payouts with zero hidden fee deductions.',
+                  desc: 'Verified NGO partners receive 95% direct payouts with zero hidden fee deductions.',
                   accent: 'var(--success)',
                 },
                 {

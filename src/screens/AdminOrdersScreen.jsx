@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ClipboardList, Search, Calendar, User, CheckCircle,
   Truck, Box, IndianRupee, Store, RefreshCw, ExternalLink,
-  ChevronRight
+  ChevronRight, ArrowLeft
 } from 'lucide-react';
 import { getAllOrders, getAllSellers } from '../utils/admin';
 import SkeletonLoader from '../components/SkeletonLoader';
@@ -91,6 +91,9 @@ const AdminOrdersScreen = () => {
     <div className="admin-orders-screen">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="page-header">
+        <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')}>
+          <ArrowLeft size={18} /> Back
+        </button>
         <div className="page-header-icon"><ClipboardList size={22} /></div>
         <div style={{ flex: 1 }}>
           <h2 className="page-title">Platform Orders</h2>
