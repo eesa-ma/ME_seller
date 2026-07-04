@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Building2, 
-  IndianRupee, 
-  Settings, 
-  LogOut, 
-  Sun, 
+import {
+  Building2,
+  IndianRupee,
+  Settings,
+  LogOut,
+  Sun,
   Moon,
   Menu,
   X,
@@ -32,6 +32,7 @@ const AdminCommunitiesSidebar = ({ onLogout }) => {
 
   const menuItems = [
     { name: 'Sellers', path: '/admin/communities', icon: Building2 },
+    { name: 'Disputes & Reports', path: '/admin/communities/reports', icon: ClipboardList },
     { name: 'Analytics', path: '/admin/communities/analytics', icon: Activity },
     { name: 'Admin Settings', path: '/admin/communities/settings', icon: Settings },
   ];
@@ -67,7 +68,7 @@ const AdminCommunitiesSidebar = ({ onLogout }) => {
         <div className="sidebar-brand">
           <div className="brand-logo">
             <div className="brand-icon" style={{
-              width: '42px', height: '42px', borderRadius: '8px', 
+              width: '42px', height: '42px', borderRadius: '8px',
               background: 'linear-gradient(135deg, var(--accent), #ff9a44)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
             }}>
@@ -87,8 +88,8 @@ const AdminCommunitiesSidebar = ({ onLogout }) => {
               const isActive = location.pathname === item.path || (item.path !== '/admin/communities' && location.pathname.startsWith(item.path));
               return (
                 <li key={item.name}>
-                  <button 
-                    onClick={() => handleNav(item.path)} 
+                  <button
+                    onClick={() => handleNav(item.path)}
                     className={`nav-link ${isActive ? 'active' : ''}`}
                   >
                     <Icon size={20} />
@@ -114,7 +115,7 @@ const AdminCommunitiesSidebar = ({ onLogout }) => {
               </>
             )}
           </button>
-          
+
           <button onClick={handleLogoutClick} className="logout-btn">
             <LogOut size={18} />
             <span>Sign Out</span>

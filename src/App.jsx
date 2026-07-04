@@ -19,6 +19,7 @@ import AdminOrdersScreen from './screens/AdminOrdersScreen';
 import AdminTransactionsScreen from './screens/AdminTransactionsScreen';
 import AdminAnalyticsHubScreen from './screens/AdminAnalyticsHubScreen';
 import AdminSettingsScreen from './screens/AdminSettingsScreen';
+import AdminReportsScreen from './screens/AdminReportsScreen';
 import { getSellerSession } from './utils/auth';
 import { supabase } from './utils/supabaseClient';
 
@@ -40,7 +41,7 @@ function App() {
     };
 
     checkSession();
-    
+
     // Listen to changes in auth state (login, logout, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session);
@@ -51,7 +52,7 @@ function App() {
     };
   }, []);
 
-    const handleLoginSuccess = () => {
+  const handleLoginSuccess = () => {
     setIsLoggedIn(true);
   };
 
@@ -64,107 +65,107 @@ function App() {
       <AnimatePresence mode="wait">
         <Routes>
           {/* Auth Route */}
-          <Route 
-            path="/auth" 
-            element={isLoggedIn ? <Navigate to="/" replace /> : <AuthScreen onLogin={handleLoginSuccess} />} 
+          <Route
+            path="/auth"
+            element={isLoggedIn ? <Navigate to="/" replace /> : <AuthScreen onLogin={handleLoginSuccess} />}
           />
 
           {/* Secure Dashboard Routes */}
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               <DashboardLayout onLogout={handleLogoutSuccess}>
                 <DashboardHome />
               </DashboardLayout>
-            } 
+            }
           />
-          
-          <Route 
-            path="/products" 
+
+          <Route
+            path="/products"
             element={
               <DashboardLayout onLogout={handleLogoutSuccess}>
                 <InventoryScreen />
               </DashboardLayout>
-            } 
+            }
           />
-          
-          <Route 
-            path="/orders" 
+
+          <Route
+            path="/orders"
             element={
               <DashboardLayout onLogout={handleLogoutSuccess}>
                 <OrdersScreen />
               </DashboardLayout>
-            } 
+            }
           />
-          
-          <Route 
-            path="/orders/:orderId" 
+
+          <Route
+            path="/orders/:orderId"
             element={
               <DashboardLayout onLogout={handleLogoutSuccess}>
                 <OrderDetailsScreen />
               </DashboardLayout>
-            } 
+            }
           />
 
-          <Route 
-            path="/transactions" 
+          <Route
+            path="/transactions"
             element={
               <DashboardLayout onLogout={handleLogoutSuccess}>
                 <TransactionsScreen />
               </DashboardLayout>
-            } 
+            }
           />
-          
-          <Route 
-            path="/analytics" 
+
+          <Route
+            path="/analytics"
             element={
               <DashboardLayout onLogout={handleLogoutSuccess}>
                 <AnalyticsScreen />
               </DashboardLayout>
-            } 
+            }
           />
-          
-          <Route 
-            path="/settings" 
+
+          <Route
+            path="/settings"
             element={
               <DashboardLayout onLogout={handleLogoutSuccess}>
                 <SettingsScreen />
               </DashboardLayout>
-            } 
+            }
           />
 
           {/* Admin Communities Routes */}
-          <Route 
-            path="/admin/communities" 
+          <Route
+            path="/admin/communities"
             element={
               <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
                 <CommunitiesScreen />
               </AdminCommunitiesLayout>
-            } 
+            }
           />
-          <Route 
-            path="/admin/communities/transactions" 
+          <Route
+            path="/admin/communities/transactions"
             element={
               <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
                 <AdminTransactionsScreen />
               </AdminCommunitiesLayout>
-            } 
+            }
           />
-          <Route 
-            path="/admin/communities/revenue" 
+          <Route
+            path="/admin/communities/revenue"
             element={
               <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
                 <AdminRevenueScreen />
               </AdminCommunitiesLayout>
-            } 
+            }
           />
-          <Route 
-            path="/admin/communities/payouts" 
+          <Route
+            path="/admin/communities/payouts"
             element={
               <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
                 <AdminPayoutsScreen />
               </AdminCommunitiesLayout>
-            } 
+            }
           />
           <Route 
             path="/admin/communities/analytics" 
@@ -174,31 +175,39 @@ function App() {
               </AdminCommunitiesLayout>
             } 
           />
-          <Route 
-            path="/admin/communities/orders" 
+          <Route
+            path="/admin/communities/orders"
             element={
               <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
                 <AdminOrdersScreen />
               </AdminCommunitiesLayout>
-            } 
+            }
           />
-          <Route 
-            path="/admin/communities/settings" 
+          <Route
+            path="/admin/communities/settings"
             element={
               <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
                 <AdminSettingsScreen />
               </AdminCommunitiesLayout>
-            } 
+            }
+          />
+          <Route
+            path="/admin/communities/reports"
+            element={
+              <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
+                <AdminReportsScreen />
+              </AdminCommunitiesLayout>
+            }
           />
 
           {/* Dynamic route must be AFTER specific nested routes */}
-          <Route 
-            path="/admin/communities/:communityId" 
+          <Route
+            path="/admin/communities/:communityId"
             element={
               <AdminCommunitiesLayout onLogout={handleLogoutSuccess}>
                 <CommunityDetailsScreen />
               </AdminCommunitiesLayout>
-            } 
+            }
           />
 
           {/* Catch-all fallback */}
