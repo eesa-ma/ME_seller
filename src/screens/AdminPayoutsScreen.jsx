@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   IndianRupee, CheckCircle2, User, Search, Store, Building, 
-  AlertTriangle, X, Check, CreditCard 
+  AlertTriangle, X, Check, CreditCard, ArrowLeft
 } from 'lucide-react';
 import { getAllSellers, processSellerPayout } from '../utils/admin';
 import SkeletonLoader from '../components/SkeletonLoader';
 
 const AdminPayoutsScreen = () => {
+  const navigate = useNavigate();
   const [sellers, setSellers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -83,9 +85,14 @@ const AdminPayoutsScreen = () => {
   return (
     <div className="admin-payouts-screen">
       <div className="header-section">
-        <div>
-          <h2 className="page-title">Payouts Processing</h2>
-          <p className="page-subtitle">Manage, verify, and process bank payouts to registered NGO and community shops.</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')} style={{ marginBottom: '0.5rem' }}>
+            <ArrowLeft size={18} /> Back
+          </button>
+          <div>
+            <h2 className="page-title">Payouts Processing</h2>
+            <p className="page-subtitle">Manage, verify, and process bank payouts to registered NGO and community shops.</p>
+          </div>
         </div>
       </div>
 

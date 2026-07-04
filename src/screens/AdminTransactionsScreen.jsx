@@ -40,8 +40,8 @@ const AdminTransactionsScreen = () => {
         date: new Date(o.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }),
         shopName: seller ? (seller.shop_name || 'Unknown') : 'Unknown NGO',
         amount: amount,
-        adminCut: amount * 0.10,
-        sellerCut: amount * 0.90,
+        adminCut: amount * 0.05,
+        sellerCut: amount * 0.95,
         sortDate: new Date(o.created_at).getTime()
       };
     })
@@ -52,7 +52,7 @@ const AdminTransactionsScreen = () => {
   return (
     <div className="admin-transactions-screen" style={{ padding: '2rem' }}>
       <div className="page-header" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button className="back-navigation-btn" onClick={() => navigate('/admin/communities')}>
+        <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')}>
           <ArrowLeft size={18} /> Back
         </button>
         <div>
@@ -79,12 +79,12 @@ const AdminTransactionsScreen = () => {
             <h3 className="kpi-chip-value" style={{ margin: 0, fontSize: '1.8rem', color: '#4facfe' }}>₹{totalPlatformRevenue.toLocaleString('en-IN')}</h3>
           </div>
           <div className="kpi-chip kpi-success" style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            <p className="kpi-chip-label" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Platform Revenue (10%)</p>
-            <h3 className="kpi-chip-value" style={{ margin: 0, fontSize: '1.8rem', color: '#10B981' }}>₹{(totalPlatformRevenue * 0.10).toLocaleString('en-IN')}</h3>
+            <p className="kpi-chip-label" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Platform Revenue (5%)</p>
+            <h3 className="kpi-chip-value" style={{ margin: 0, fontSize: '1.8rem', color: '#10B981' }}>₹{(totalPlatformRevenue * 0.05).toLocaleString('en-IN')}</h3>
           </div>
           <div className="kpi-chip kpi-warning" style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            <p className="kpi-chip-label" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Sellers Net (90%)</p>
-            <h3 className="kpi-chip-value" style={{ margin: 0, fontSize: '1.8rem', color: '#F59E0B' }}>₹{(totalPlatformRevenue * 0.90).toLocaleString('en-IN')}</h3>
+            <p className="kpi-chip-label" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Sellers Net (95%)</p>
+            <h3 className="kpi-chip-value" style={{ margin: 0, fontSize: '1.8rem', color: '#F59E0B' }}>₹{(totalPlatformRevenue * 0.95).toLocaleString('en-IN')}</h3>
           </div>
         </div>
       )}
@@ -101,8 +101,8 @@ const AdminTransactionsScreen = () => {
                   <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Date</th>
                   <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Seller (NGO)</th>
                   <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Gross Amount</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Admin (10%)</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Seller (90%)</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Admin (5%)</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Seller (95%)</th>
                 </tr>
               </thead>
               <tbody>
