@@ -2,14 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminCommunitiesSidebar from './AdminCommunitiesSidebar';
 import { getSellerSession, logoutSeller } from '../utils/auth';
-import { ShieldCheck, UserCog, LogOut, Mail, Store } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldCheck, UserCog } from 'lucide-react';
 
 const AdminCommunitiesLayout = ({ children, onLogout }) => {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
   const [forbidden, setForbidden] = useState(false);
-  const [showAdminDropdown, setShowAdminDropdown] = useState(false);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -185,59 +183,14 @@ const AdminCommunitiesLayout = ({ children, onLogout }) => {
           </div>
 
           <div className="topbar-actions">
-            <div style={{ position: 'relative' }}>
-              <div 
-                className="topbar-profile" 
-                style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', padding: '0.5rem', borderRadius: '8px' }}
-                onClick={() => setShowAdminDropdown(!showAdminDropdown)}
-              >
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>{admin.ownerName || 'Admin'}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Super Admin</div>
-                </div>
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                  {admin.ownerName ? admin.ownerName.charAt(0).toUpperCase() : 'A'}
-                </div>
+            <div className="topbar-profile" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>{admin.ownerName || 'Admin'}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Super Admin</div>
               </div>
-
-              <AnimatePresence>
-                {showAdminDropdown && (
-                  <motion.div 
-                    className="admin-dropdown card"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                  >
-                    <div className="admin-dropdown-header">
-                      <h4>Admin Details</h4>
-                    </div>
-                    <div className="admin-dropdown-body">
-                      <div className="admin-detail-item">
-                        <Store size={16} className="detail-icon" />
-                        <span><strong>Shop:</strong> {admin.shopName || 'N/A'}</span>
-                      </div>
-                      {admin.email && (
-                        <div className="admin-detail-item">
-                          <Mail size={16} className="detail-icon" />
-                          <span><strong>Email:</strong> {admin.email}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="admin-dropdown-footer">
-                      <button 
-                        className="logout-btn" 
-                        onClick={async () => {
-                          await logoutSeller();
-                          if (onLogout) onLogout();
-                          navigate('/auth');
-                        }}
-                      >
-                        <LogOut size={16} /> Logout
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                {admin.ownerName ? admin.ownerName.charAt(0).toUpperCase() : 'A'}
+              </div>
             </div>
           </div>
         </header>
@@ -296,78 +249,6 @@ const AdminCommunitiesLayout = ({ children, onLogout }) => {
           .dashboard-page-body {
             padding: 1.25rem;
           }
-        }
-        .topbar-profile:hover {
-          background-color: var(--bg-primary);
-        }
-
-        .admin-dropdown {
-          position: absolute;
-          top: 120%;
-          right: 0;
-          width: 260px;
-          padding: 0;
-          z-index: 1000;
-          overflow: hidden;
-        }
-
-        .admin-dropdown-header {
-          padding: 1rem;
-          border-bottom: 1px solid var(--border);
-          background-color: var(--bg-primary);
-        }
-
-        .admin-dropdown-header h4 {
-          margin: 0;
-          font-size: 0.9rem;
-          color: var(--text-primary);
-        }
-
-        .admin-dropdown-body {
-          padding: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.8rem;
-        }
-
-        .admin-detail-item {
-          display: flex;
-          align-items: center;
-          gap: 0.8rem;
-          font-size: 0.85rem;
-          color: var(--text-secondary);
-        }
-        
-        .admin-detail-item .detail-icon {
-          color: var(--accent);
-          flex-shrink: 0;
-        }
-
-        .admin-dropdown-footer {
-          padding: 0.8rem 1rem;
-          border-top: 1px solid var(--border);
-          background-color: var(--bg-primary);
-        }
-
-        .logout-btn {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          padding: 0.6rem;
-          background: var(--danger-soft);
-          color: var(--danger);
-          border: none;
-          border-radius: 6px;
-          font-weight: 600;
-          font-size: 0.85rem;
-          transition: var(--transition);
-        }
-
-        .logout-btn:hover {
-          background: var(--danger);
-          color: white;
         }
       `}</style>
     </div>
