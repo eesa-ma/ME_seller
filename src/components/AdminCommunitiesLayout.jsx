@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminCommunitiesSidebar from './AdminCommunitiesSidebar';
-import { getSellerSession } from '../utils/auth';
+import { getSellerSession, logoutSeller } from '../utils/auth';
 import { ShieldCheck, UserCog } from 'lucide-react';
 
 const AdminCommunitiesLayout = ({ children, onLogout }) => {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
+  const [forbidden, setForbidden] = useState(false);
 
-  // Assuming seller session implies admin access for now, or we just verify any session.
   useEffect(() => {
     const fetchSession = async () => {
       try {
         const session = await getSellerSession();
         if (!session) {
           navigate('/auth');
+        } else if (!session.is_admin) {
+          setForbidden(true);
         } else {
           setAdmin(session);
         }
@@ -25,6 +27,108 @@ const AdminCommunitiesLayout = ({ children, onLogout }) => {
     };
     fetchSession();
   }, [navigate]);
+
+  if (forbidden) {
+    return (
+      <div className="layout-forbidden">
+        <div className="forbidden-card">
+          <div className="lock-icon-wrapper">
+            <span style={{ fontSize: '3rem' }}>🔒</span>
+          </div>
+          <h2>Access Denied</h2>
+          <p>You require Super Admin privileges to access the Communities Admin Dashboard.</p>
+          <div className="button-group">
+            <button className="nav-btn-home" onClick={() => navigate('/')}>
+              Go to Seller Dashboard
+            </button>
+            <button className="nav-btn-logout" onClick={async () => {
+              await logoutSeller();
+              if (onLogout) onLogout();
+              navigate('/auth');
+            }}>
+              Sign Out
+            </button>
+          </div>
+        </div>
+        <style>{`
+          .layout-forbidden {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            padding: 2rem;
+          }
+          .forbidden-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            max-width: 460px;
+            text-align: center;
+            box-shadow: var(--shadow-hover);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+          }
+          .lock-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .forbidden-card h2 {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            margin: 0;
+          }
+          .forbidden-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 0;
+          }
+          .button-group {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            margin-top: 1rem;
+          }
+          .nav-btn-home {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--accent);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 118, 18, 0.2);
+          }
+          .nav-btn-home:hover {
+            background: var(--accent-hover);
+          }
+          .nav-btn-logout {
+            padding: 0.75rem 1.25rem;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+          }
+          .nav-btn-logout:hover {
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--danger);
+            border-color: var(--danger);
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   if (!admin) {
     return (
