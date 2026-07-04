@@ -136,12 +136,12 @@ const AdminReportsScreen = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', cursor: 'pointer' }}
           >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="in_review">In Review</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="resolved">Resolved</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="all">All Status</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="pending">Pending</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="in_review">In Review</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="approved">Approved</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="rejected">Rejected</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="resolved">Resolved</option>
           </select>
         </div>
       </div>
