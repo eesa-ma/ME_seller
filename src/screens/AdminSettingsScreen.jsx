@@ -13,7 +13,7 @@ const AdminSettingsScreen = () => {
 
   // ─── Config state (persisted to localStorage) ───────────────────────────
   const [commissionRate, setCommissionRate] = useState(
-    () => localStorage.getItem('admin_commission') || '10'
+    () => localStorage.getItem('admin_commission') || '5'
   );
   const [adminEmail, setAdminEmail] = useState(
     () => localStorage.getItem('admin_email') || 'support@mindempowered.org'

@@ -135,10 +135,11 @@ const CommunityDetailsScreen = () => {
   return (
     <div className="community-details">
       {/* Header Profile Section */}
+      <button className="back-navigation-btn" style={{ marginBottom: '1.25rem' }} onClick={() => navigate('/admin/communities')}>
+        <ArrowLeft size={18} /> Back to NGOs
+      </button>
+
       <div className="details-header">
-        <button className="back-navigation-btn" onClick={() => navigate('/admin/communities')}>
-          <ArrowLeft size={18} /> Back to NGOs
-        </button>
 
         <div className="banner" style={{ background: ngo.color }}>
         </div>

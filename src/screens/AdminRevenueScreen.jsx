@@ -108,10 +108,10 @@ const AdminRevenueScreen = () => {
   return (
     <div className="admin-revenue-screen">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')} style={{ marginBottom: '1rem' }}>
+        <ArrowLeft size={18} /> Back
+      </button>
       <div className="page-header">
-        <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')}>
-          <ArrowLeft size={18} /> Back
-        </button>
         <div className="page-header-icon"><BarChart3 size={22} /></div>
         <div>
           <h2 className="page-title">Revenue Analytics</h2>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, IndianRupee, ShoppingBag, PackageCheck, TrendingUp, TrendingDown, MoreVertical, Search, X } from 'lucide-react';
+import { Building2, IndianRupee, ShoppingBag, PackageCheck, TrendingUp, TrendingDown, MoreVertical, Search, X, CheckCircle } from 'lucide-react';
 import { getAllSellers, getAllProducts, getAllOrders } from '../utils/admin';
 import { supabase } from '../utils/supabaseClient';
 import SkeletonLoader from '../components/SkeletonLoader';
@@ -180,8 +180,8 @@ const CommunitiesScreen = () => {
               <div className="stat-content">
                 <p className="stat-label">Pending Payouts</p>
                 <h3 className="stat-value">₹{totalPendingPayouts.toLocaleString('en-IN')}</h3>
-                <p className="stat-change negative">
-                  <TrendingDown size={14} /> {sellersAwaitingPayout} Sellers awaiting
+                <p className={`stat-change ${sellersAwaitingPayout > 0 ? 'negative' : 'positive'}`}>
+                  {sellersAwaitingPayout > 0 ? <TrendingDown size={14} /> : <CheckCircle size={14} />} {sellersAwaitingPayout} Sellers awaiting
                 </p>
               </div>
             </motion.div>

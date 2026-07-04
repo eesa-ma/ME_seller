@@ -90,10 +90,10 @@ const AdminOrdersScreen = () => {
   return (
     <div className="admin-orders-screen">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')} style={{ marginBottom: '1rem' }}>
+        <ArrowLeft size={18} /> Back
+      </button>
       <div className="page-header">
-        <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')}>
-          <ArrowLeft size={18} /> Back
-        </button>
         <div className="page-header-icon"><ClipboardList size={22} /></div>
         <div style={{ flex: 1 }}>
           <h2 className="page-title">Platform Orders</h2>

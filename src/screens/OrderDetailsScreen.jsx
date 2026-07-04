@@ -134,11 +134,11 @@ const OrderDetailsScreen = () => {
 
   return (
     <div className="order-details-screen">
+      <button onClick={() => navigate('/orders')} className="back-navigation-btn" style={{ marginBottom: '1rem' }}>
+        <ArrowLeft size={16} /> Back to Orders
+      </button>
       <div className="orders-header">
         <div>
-          <button onClick={() => navigate('/orders')} className="back-navigation-btn">
-            <ArrowLeft size={16} /> Back to Orders
-          </button>
           <h2>Order Details — {order.id.split('-')[0]}</h2>
           <p>Received on {new Date(order.created_at).toLocaleString()}</p>
         </div>

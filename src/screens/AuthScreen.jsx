@@ -57,12 +57,6 @@ const AuthScreen = ({ onLogin }) => {
       }
     }
   };
- 
-  // const handleQuickLogin = () => {
-  //   setEmail('seller@mind-empowered.org');
-  //   setPassword('password');
-  //   setIsLogin(true);
-  // };
 
   return (
     <div className="auth-container">
@@ -112,7 +106,7 @@ const AuthScreen = ({ onLogin }) => {
                   type="email" 
                   id="email" 
                   className="form-input" 
-                  placeholder="seller@mind-empowered.org" 
+                  placeholder="Enter your email address" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -146,7 +140,7 @@ const AuthScreen = ({ onLogin }) => {
                       type="text" 
                       id="shopName" 
                       className="form-input" 
-                      placeholder="Mind Empowered Crafts" 
+                      placeholder="Enter your shop name" 
                       value={shopName}
                       onChange={(e) => setShopName(e.target.value)}
                       required
@@ -162,7 +156,7 @@ const AuthScreen = ({ onLogin }) => {
                       type="text" 
                       id="ownerName" 
                       className="form-input" 
-                      placeholder="ME Coordinator" 
+                      placeholder="Enter your full name" 
                       value={ownerName}
                       onChange={(e) => setOwnerName(e.target.value)}
                       required

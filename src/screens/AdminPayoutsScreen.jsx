@@ -84,11 +84,11 @@ const AdminPayoutsScreen = () => {
 
   return (
     <div className="admin-payouts-screen">
+      <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')} style={{ marginBottom: '1rem' }}>
+        <ArrowLeft size={18} /> Back
+      </button>
       <div className="header-section">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')} style={{ marginBottom: '0.5rem' }}>
-            <ArrowLeft size={18} /> Back
-          </button>
           <div>
             <h2 className="page-title">Payouts Processing</h2>
             <p className="page-subtitle">Manage, verify, and process bank payouts to registered NGO and community shops.</p>

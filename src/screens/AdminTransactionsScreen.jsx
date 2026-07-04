@@ -51,10 +51,10 @@ const AdminTransactionsScreen = () => {
 
   return (
     <div className="admin-transactions-screen" style={{ padding: '2rem' }}>
+      <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')} style={{ marginBottom: '1rem' }}>
+        <ArrowLeft size={18} /> Back
+      </button>
       <div className="page-header" style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button className="back-navigation-btn" onClick={() => navigate('/admin/communities/analytics')}>
-          <ArrowLeft size={18} /> Back
-        </button>
         <div>
           <h2 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div className="stat-icon-wrapper" style={{ background: 'rgba(79, 172, 254, 0.15)', color: '#4facfe', padding: '0.5rem', borderRadius: '8px', display: 'inline-flex' }}>
