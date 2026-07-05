@@ -26,9 +26,13 @@ const AuthScreen = ({ onLogin }) => {
 
     if (isLogin) {
       try {
-        await loginSeller(email, password); 
+        const session = await loginSeller(email, password); 
         if (onLogin) onLogin();
-        navigate('/');
+        if (session.is_admin) {
+          navigate('/admin/communities');
+        } else {
+          navigate('/');
+        }
       } catch (err) {
         console.error("Login Error:", err);
         setError(err.message || 'Login failed. Please check your credentials.');
@@ -40,21 +44,19 @@ const AuthScreen = ({ onLogin }) => {
       }
       
       try {
-        await registerSeller(email, password, { shopName, ownerName, category }); // await the Supabase call
+        const session = await registerSeller(email, password, { shopName, ownerName, category }); // await the Supabase call
         if (onLogin) onLogin();
-        navigate('/');
+        if (session.is_admin) {
+          navigate('/admin/communities');
+        } else {
+          navigate('/');
+        }
       } catch (err) {
         console.error("Registration Error:", err);
         setError(err.message || 'Registration failed.');
       }
     }
   };
- 
-  // const handleQuickLogin = () => {
-  //   setEmail('seller@mind-empowered.org');
-  //   setPassword('password');
-  //   setIsLogin(true);
-  // };
 
   return (
     <div className="auth-container">
@@ -104,7 +106,7 @@ const AuthScreen = ({ onLogin }) => {
                   type="email" 
                   id="email" 
                   className="form-input" 
-                  placeholder="seller@mind-empowered.org" 
+                  placeholder="Enter your email address" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -138,7 +140,7 @@ const AuthScreen = ({ onLogin }) => {
                       type="text" 
                       id="shopName" 
                       className="form-input" 
-                      placeholder="Mind Empowered Crafts" 
+                      placeholder="Enter your shop name" 
                       value={shopName}
                       onChange={(e) => setShopName(e.target.value)}
                       required
@@ -154,7 +156,7 @@ const AuthScreen = ({ onLogin }) => {
                       type="text" 
                       id="ownerName" 
                       className="form-input" 
-                      placeholder="ME Coordinator" 
+                      placeholder="Enter your full name" 
                       value={ownerName}
                       onChange={(e) => setOwnerName(e.target.value)}
                       required
@@ -181,23 +183,10 @@ const AuthScreen = ({ onLogin }) => {
             )}
 
             <button type="submit" className="btn btn-primary auth-submit-btn">
-              {isLogin ? 'Sign In as Seller' : 'Complete Setup & Register'}
+              {isLogin ? 'Sign In' : 'Complete Setup & Register'}
             </button>
           </form>
 
-          {/* isLogin && (
-            <div className="demo-login-box">
-              <div className="demo-badge">Demo Account Available</div>
-              <p>Quick login to view mock store settings, products, and sales logs:</p>
-              <button 
-                type="button" 
-                onClick={handleQuickLogin}
-                className="btn btn-secondary quick-login-btn"
-              >
-                Use default credential
-              </button>
-            </div>
-          ) */}
         </div>
       </motion.div>
 

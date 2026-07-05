@@ -239,7 +239,7 @@ const AnalyticsScreen = () => {
                     <td>
                       <div className="top-product-details">
                         <img 
-                          src={(prod.images && prod.images[0]) || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=400'} 
+                          src={(prod.images && prod.images[0])} 
                           alt={prod.name} 
                           className="top-product-thumb"
                         />

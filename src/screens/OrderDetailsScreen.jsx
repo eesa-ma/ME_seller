@@ -9,9 +9,12 @@ import {
   CheckCircle,
   Package,
   RotateCw,
-  CircleDashed
+  CircleDashed,
+  Download
 } from 'lucide-react';
 import { getOrderById, updateOrderStatus } from '../utils/order';
+import { getSellerDetails } from '../utils/admin';
+import { generateOrderInvoice } from '../utils/invoice';
 import SkeletonLoader from '../components/SkeletonLoader';
 
 const TRACKING_STEPS = [
@@ -57,6 +60,22 @@ const OrderDetailsScreen = () => {
   const [courierPartner, setCourierPartner] = useState('');
   const [selectedTrackingStatus, setSelectedTrackingStatus] = useState('Packed');
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+
+  const handleDownloadInvoice = async () => {
+    if (!order) return;
+    setIsGeneratingInvoice(true);
+    try {
+      const sellerData = await getSellerDetails(order.seller_id);
+      const seller = sellerData ? sellerData.seller : null;
+      generateOrderInvoice(order, seller);
+    } catch (err) {
+      console.error("Error generating invoice:", err);
+      alert("Failed to generate invoice.");
+    } finally {
+      setIsGeneratingInvoice(false);
+    }
+  };
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -134,14 +153,30 @@ const OrderDetailsScreen = () => {
 
   return (
     <div className="order-details-screen">
+      <button onClick={() => navigate('/orders')} className="back-navigation-btn" style={{ marginBottom: '1rem' }}>
+        <ArrowLeft size={16} /> Back to Orders
+      </button>
       <div className="orders-header">
         <div>
-          <button onClick={() => navigate('/orders')} className="btn btn-secondary btn-sm" style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ArrowLeft size={16} /> Back to Orders
-          </button>
           <h2>Order Details — {order.id.split('-')[0]}</h2>
-          <p>Received on {new Date(order.created_at).toLocaleString()}</p>
+          <p>Received on {new Date(order.created_at).toLocaleString('en-GB')}</p>
         </div>
+        <button 
+          onClick={handleDownloadInvoice} 
+          disabled={isGeneratingInvoice}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            padding: '0.6rem 1.2rem', background: 'var(--accent)',
+            color: 'white', border: 'none', borderRadius: '8px',
+            fontWeight: '600', cursor: isGeneratingInvoice ? 'not-allowed' : 'pointer',
+            opacity: isGeneratingInvoice ? 0.7 : 1, transition: 'background 0.2s'
+          }}
+          onMouseEnter={(e) => { if(!isGeneratingInvoice) e.currentTarget.style.background = 'var(--accent-hover)' }}
+          onMouseLeave={(e) => { if(!isGeneratingInvoice) e.currentTarget.style.background = 'var(--accent)' }}
+        >
+          <Download size={16} />
+          {isGeneratingInvoice ? 'Generating...' : 'Download Invoice'}
+        </button>
       </div>
 
       <motion.div 
