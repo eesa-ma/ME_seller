@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SkeletonLoader from '../components/SkeletonLoader';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Settings, 
   Store, 
@@ -146,16 +146,19 @@ const SettingsScreen = () => {
         </div>
       </div>
 
-      {saved && (
-        <motion.div 
-          className="settings-save-success"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <CheckCircle size={18} />
-          <span>Success! Shop settings successfully saved. Changes applied.</span>
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {saved && (
+          <motion.div 
+            className="settings-save-success"
+            initial={{ opacity: 0, y: 50, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 50, x: '-50%' }}
+          >
+            <CheckCircle size={18} />
+            <span>Success! Shop settings successfully saved. Changes applied.</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {isLoadingSettings ? (
         <div className="card settings-card">
@@ -473,16 +476,21 @@ const SettingsScreen = () => {
         }
 
         .settings-save-success {
+          position: fixed;
+          bottom: 40px;
+          left: 50%;
+          z-index: 9999;
           background: var(--success-soft);
           color: var(--success);
           border: 1px solid var(--success);
-          padding: 0.85rem 1.25rem;
-          border-radius: 10px;
+          padding: 1rem 1.5rem;
+          border-radius: 50px;
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          font-size: 0.9rem;
+          font-size: 0.95rem;
           font-weight: 600;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
         .settings-form-layout {
