@@ -15,7 +15,7 @@ export const getProducts = async () => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    
+
     return data ? data.map(p => ({
       ...p,
       salesCount: p.sales_count
@@ -38,7 +38,7 @@ export const getProductViews = async (productIds = []) => {
       .in('product_id', productIds);
 
     if (error) throw error;
-    
+
     return data || [];
   } catch (error) {
     console.error("Error fetching product views:", error);
@@ -138,7 +138,7 @@ export const deleteProduct = async (id) => {
       .eq('seller_id', session.id); // Extra safety check
 
     if (error) throw error;
-    
+
     return true;
   } catch (error) {
     console.error("Error deleting product:", error);

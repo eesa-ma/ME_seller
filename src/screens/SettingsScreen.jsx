@@ -31,6 +31,13 @@ const SettingsScreen = () => {
   const [accountNumber, setAccountNumber] = useState('');
   const [ifsc, setIfsc] = useState('');
 
+  // Address
+  const [addressLine1, setAddressLine1] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+
   const [saved, setSaved] = useState(false);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
@@ -51,6 +58,11 @@ const SettingsScreen = () => {
           setBankName(seller.bankName || '');
           setAccountNumber(seller.accountNumber || '');
           setIfsc(seller.ifsc || '');
+          setAddressLine1(seller.addressLine1 || '');
+          setAddressLine2(seller.addressLine2 || '');
+          setCity(seller.city || '');
+          setState(seller.state || '');
+          setPostalCode(seller.postalCode || '');
         }
       } catch (err) {
         console.error("Settings session error:", err);
@@ -103,7 +115,12 @@ const SettingsScreen = () => {
         locationUrl,
         bankName,
         accountNumber,
-        ifsc
+        ifsc,
+        addressLine1,
+        addressLine2,
+        city,
+        state,
+        postalCode
       };
 
       await updateSellerProfile(payload);
@@ -298,6 +315,81 @@ const SettingsScreen = () => {
                 required
               />
             </div>
+          </div>
+        </div>
+
+        {/* Address Settings */}
+        <div className="card settings-card">
+          <div className="settings-card-header">
+            <Building size={20} className="header-icon" />
+            <h3>Shop Address</h3>
+          </div>
+          <p className="card-sub-info">Your shop's physical address. Important for shipping and delivery calculations.</p>
+
+          <div className="form-group">
+            <label htmlFor="address-line-1">Address Line 1</label>
+            <input 
+              type="text" 
+              id="address-line-1" 
+              className="form-input" 
+              placeholder="Building, Street, etc." 
+              value={addressLine1}
+              onChange={(e) => setAddressLine1(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="address-line-2">Address Line 2 (Optional)</label>
+            <input 
+              type="text" 
+              id="address-line-2" 
+              className="form-input" 
+              placeholder="Apartment, Suite, Unit, etc." 
+              value={addressLine2}
+              onChange={(e) => setAddressLine2(e.target.value)}
+            />
+          </div>
+
+          <div className="form-double-col">
+            <div className="form-group">
+              <label htmlFor="city">City</label>
+              <input 
+                type="text" 
+                id="city" 
+                className="form-input" 
+                placeholder="City" 
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="state">State</label>
+              <input 
+                type="text" 
+                id="state" 
+                className="form-input" 
+                placeholder="State" 
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="postal-code">Postal Code / PIN Code</label>
+            <input 
+              type="text" 
+              id="postal-code" 
+              className="form-input" 
+              placeholder="e.g. 110001" 
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              required
+            />
           </div>
         </div>
 

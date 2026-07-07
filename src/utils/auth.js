@@ -36,7 +36,12 @@ export const getSellerSession = async () => {
         accountNumber: sellerData.account_number,
         ifsc: sellerData.ifsc,
         aboutSeller: sellerData.about,
-        is_admin: sellerData.is_admin || false
+        is_admin: sellerData.is_admin || false,
+        addressLine1: sellerData.address_line_1,
+        addressLine2: sellerData.address_line_2,
+        city: sellerData.city,
+        state: sellerData.state,
+        postalCode: sellerData.postal_code
     };
 };
 
@@ -73,7 +78,12 @@ export const loginSeller = async (email, password) => {
         accountNumber: sellerData.account_number,
         ifsc: sellerData.ifsc,
         aboutSeller: sellerData.about,
-        is_admin: sellerData.is_admin || false
+        is_admin: sellerData.is_admin || false,
+        addressLine1: sellerData.address_line_1,
+        addressLine2: sellerData.address_line_2,
+        city: sellerData.city,
+        state: sellerData.state,
+        postalCode: sellerData.postal_code
     };
 };
 
@@ -208,7 +218,12 @@ export const updateSellerProfile = async (updatedDetails) => {
             bank_name: updatedDetails.bankName,
             account_number: updatedDetails.accountNumber,
             ifsc: updatedDetails.ifsc,
-            about: updatedDetails.aboutSeller
+            about: updatedDetails.aboutSeller,
+            address_line_1: updatedDetails.addressLine1,
+            address_line_2: updatedDetails.addressLine2,
+            city: updatedDetails.city,
+            state: updatedDetails.state,
+            postal_code: updatedDetails.postalCode
         })
         .eq('id', session.user.id);
 
