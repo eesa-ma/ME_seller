@@ -13,9 +13,10 @@ import {
   EyeOff,
   ArrowUpDown,
   TrendingUp,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Star
 } from 'lucide-react';
-import { getProducts, saveProduct, deleteProduct, uploadProductImage } from '../utils/product';
+import { getProducts, saveProduct, deleteProduct, uploadProductImage, toggleProductFeaturedStatus } from '../utils/product';
 
 const CATEGORIES = ['Wellness', 'Accessories', 'Stationery', 'Apparel', 'Crafts'];
 
@@ -95,6 +96,15 @@ const InventoryScreen = () => {
     if (window.confirm('Are you sure you want to delete this listing from your inventory?')) {
       await deleteProduct(id);
       loadProducts();
+    }
+  };
+
+  const handleToggleFeatured = async (prod) => {
+    try {
+      const newStatus = await toggleProductFeaturedStatus(prod.id, prod.isFeatured);
+      setProducts(products.map(p => p.id === prod.id ? { ...p, isFeatured: newStatus } : p));
+    } catch (error) {
+      alert("Failed to update featured status.");
     }
   };
 
@@ -305,6 +315,13 @@ const InventoryScreen = () => {
                     </td>
                     <td>
                       <div className="actions-cell">
+                        <button
+                          onClick={() => handleToggleFeatured(prod)}
+                          className={`action-btn feature-btn ${prod.isFeatured ? 'featured' : ''}`}
+                          title={prod.isFeatured ? 'Remove from Featured' : 'Mark as Featured'}
+                        >
+                          <Star size={16} fill={prod.isFeatured ? "currentColor" : "none"} />
+                        </button>
                         <button
                           onClick={() => handleOpenEditModal(prod)}
                           className="action-btn edit-btn"
@@ -765,6 +782,26 @@ const InventoryScreen = () => {
 
         .edit-btn:hover {
           background: var(--me-navy);
+          color: white;
+        }
+
+        .feature-btn {
+          color: var(--text-secondary);
+          background: rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-btn:hover {
+          background: #f59e0b;
+          color: white;
+        }
+
+        .feature-btn.featured {
+          color: #f59e0b;
+          background: rgba(245, 158, 11, 0.1);
+        }
+
+        .feature-btn.featured:hover {
+          background: #f59e0b;
           color: white;
         }
 
